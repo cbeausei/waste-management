@@ -22,19 +22,18 @@ class AppMain extends LitElement {
 
     // Shared styles.
     this.baseStyle = html`
-      <style>
-        :host {
-          box-sizing: border-box;
-          display: flex;
-          flex-direction: column;
-          height: 100%;
-          margin: 10px;
-          width:100%;
-        }
-        button:hover {
-          cursor: pointer;
-        }
-      </style>
+    <style>
+      :host {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        padding: 10px;
+        width:100%;
+      }
+      button:hover {
+        cursor: pointer;
+      }
+    </style>
     `
   }
 
