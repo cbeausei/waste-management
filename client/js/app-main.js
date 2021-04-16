@@ -10,8 +10,8 @@ class AppMain extends LitElement {
   constructor() {
     super();
     this.ping = 'Ping...';
-    this.queryServer('/game/ping', {}).then(pong => {
-      this.ping = pong;
+    this.queryServer('/game/ping', {}).then(response => {
+      this.ping = response.pong;
     });
   }
 

@@ -22,7 +22,7 @@ app.get('/', (req, res) => {
 
 // Server ping
 app.post('/game/ping', (req, res) => {
-  res.send('pong');
+  res.send({pong: 'pong'});
 });
 
 app.listen(port, () => {
