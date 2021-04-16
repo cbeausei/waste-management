@@ -5,6 +5,7 @@ class AppMain extends LitElement {
     return {
       gameCode: {type: String},
       gameCodeError: {type: String},
+      nick: {type: String},
       playerId: {type: Number},
       players: {type: Array},
       started: {type: Boolean},
@@ -38,13 +39,31 @@ class AppMain extends LitElement {
       [error] {
         color: red;
       }
+      [nick] {
+        color: blue;
+      }
+      [gamecode] {
+        font-weight: 700;
+      }
     </style>
     `
   }
 
-  renderLandingPage() {
+  renderNickSelectionPage() {
     return html`
       ${this.baseStyle}
+      <h2>Pick a nickname:</h2>
+      <div>
+        <input id="player-nick" type="text">
+        <button @click="${this.chooseNick}">Confirm</button>
+      </div>
+    `;
+  }
+
+  renderGameSelectionPage() {
+    return html`
+      ${this.baseStyle}
+      <h2>Player <span nick>${this.nick}</span></h2>
       <button @click="${this.createGame}">Create a new game</button>
       <p>Or join an existing lobby by entering the game code below:</p>
       <div>
@@ -55,28 +74,19 @@ class AppMain extends LitElement {
     `;
   }
 
-  renderNickSelectionPage() {
-    return html`
-      ${this.baseStyle}
-      <h2>Pick a nickname:</h2>
-      <div>
-        <input id="player-nick" type="text">
-        <button @click="${this.createPlayer}">Confirm</button>
-      </div>
-    `;
-  }
 
   renderPreGamePage() {
     return html`
       ${this.baseStyle}
       <h1>Waiting lobby.</h1>
-      <p>Game code: ${this.gameCode}</p>
+      <h2>Player <span nick>${this.nick}</span></h2>
+      <p>Game code: <span gamecode>${this.gameCode}</span></p>
       <p>Alternatively share the following URL: ${location.origin}/?gameCode=${this.gameCode}</p>
       <h2>Players connected</h2>
       <ul>
         ${this.players.map(nick => html`
           <li>
-            ${nick === this.nick ? html`<b>${nick}</b>` : html`${nick}`}
+            ${nick === this.nick ? html`<span nick>${nick}</span>` : html`<span>${nick}</span>`}
           </li>
         `)}
       </ul>
@@ -92,11 +102,11 @@ class AppMain extends LitElement {
   }
 
   render() {
-    if (this.gameCode == null || this.gameCodeError != null) {
-      return this.renderLandingPage();
-    }
-    if (this.playerId == null) {
+    if (this.nick == null) {
       return this.renderNickSelectionPage();
+    }
+    if (this.gameCode == null || this.gameCodeError != null) {
+      return this.renderGameSelectionPage();
     }
     if (!this.gameStarted) {
       return this.renderPreGamePage();
@@ -125,15 +135,20 @@ class AppMain extends LitElement {
     const game = await response.json();
     this.gameCodeError = null;
     this.gameCode = game.gameCode;
+    await this.createPlayer();
   }
 
-  joinGame() {
+  async joinGame() {
     this.gameCodeError = null;
     this.gameCode = this.shadowRoot.getElementById('game-code').value;
+    await this.createPlayer();
+  }
+
+  chooseNick() {
+    this.nick = this.shadowRoot.getElementById('player-nick').value;
   }
 
   async createPlayer() {
-    this.nick = this.shadowRoot.getElementById('player-nick').value;
     const info = await this.queryServer('/game/join', {nick: this.nick});
     if (info.error) {
       this.gameCodeError = info.error;
