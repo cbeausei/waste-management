@@ -42,8 +42,12 @@ class AppMain extends LitElement {
       [nick] {
         color: blue;
       }
-      [gamecode] {
+      [bold] {
         font-weight: 700;
+      }
+      [flex-line] {
+        align-items: center;
+        display: flex;
       }
     </style>
     `
@@ -75,13 +79,22 @@ class AppMain extends LitElement {
   }
 
 
-  renderPreGamePage() {
+  renderLobbyPage() {
     return html`
       ${this.baseStyle}
       <h1>Waiting lobby.</h1>
       <h2>Player <span nick>${this.nick}</span></h2>
-      <p>Game code: <span gamecode>${this.gameCode}</span></p>
-      <p>Alternatively share the following URL: ${location.origin}/?gameCode=${this.gameCode}</p>
+      <p>
+        Game code: <span bold>${this.gameCode}</span>
+        <button @click="${this.copyGameCode}">Copy code</button>
+      </p>
+      <p>
+        <div>Alternatively share the following URL:</div>
+        <div flex-line>
+          <span bold>${location.origin}/?gameCode=${this.gameCode}</span>
+          <button style="margin-left: 5px;" @click="${this.copyGameUrl}">Copy URL</button>
+        </div>
+      </p>
       <h2>Players connected</h2>
       <ul>
         ${this.players.map(nick => html`
@@ -109,9 +122,25 @@ class AppMain extends LitElement {
       return this.renderGameSelectionPage();
     }
     if (!this.gameStarted) {
-      return this.renderPreGamePage();
+      return this.renderLobbyPage();
     }
     return this.renderGamePage();
+  }
+
+  async copyGameCode() {
+    const type = 'text/plain';
+    const blob = new Blob([this.gameCode], {type});
+    const data = [new ClipboardItem({[type]: blob})];
+    await navigator.clipboard.write(data);
+    alert('Game code copied to clipboard.');
+  }
+
+  async copyGameUrl() {
+    const type = 'text/plain';
+    const blob = new Blob([`${location.origin}/?gameCode=${this.gameCode}`], {type});
+    const data = [new ClipboardItem({[type]: blob})];
+    await navigator.clipboard.write(data);
+    alert('Game URL copied to clipboard.');
   }
 
   async queryServer(path, request) {
@@ -147,11 +176,14 @@ class AppMain extends LitElement {
     await this.createPlayer();
   }
 
-  chooseNick(event) {
+  async chooseNick(event) {
     if (event.keyCode && event.keyCode !== 13) {
       return;
     }
     this.nick = this.shadowRoot.getElementById('player-nick').value;
+    if (this.gameCode) {
+      await this.createPlayer();
+    }
   }
 
   async createPlayer() {

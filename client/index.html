@@ -28,7 +28,7 @@
       const app = document.getElementById('app');
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.has('gameCode')) {
-        const gameId = urlParams.get('gameCode');
+        const gameCode = urlParams.get('gameCode');
         app.setAttribute('gameCode', gameCode);
       }
     </script>

@@ -13,7 +13,7 @@ const clientRoot = __dirname + '/client/';
 const jsonParser = bodyParser.json();
 
 // Constants.
-const alphabet = 'ABCDEFGHIJKLMNOPQRSTUWXYZ';
+const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
 // Include the JS client.
 app.use('/js', express.static('client/js'));
@@ -59,7 +59,8 @@ app.post('/game/update', jsonParser, async (req, res) => {
 function generateGameCode(): string {
   let gameCode = '';
   for (let _ = 0; _ < 4; ++_) {
-    gameCode += alphabet[Math.floor(Math.random() * 26)];
+    const letter = Math.floor(Math.random() * 26);
+    gameCode += alphabet[letter];
   }
   return gameCode;
 }
