@@ -1,5 +1,9 @@
 # Waste management game server
 
+## Prototype
+
+https://waste-management.cbeausei.eu
+
 ## Requirements
 
 * NodeJS & npm
@@ -29,3 +33,5 @@ npm i
 ```
 npm start
 ```
+
+This start the server on port 5005.
