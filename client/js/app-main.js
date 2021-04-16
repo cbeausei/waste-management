@@ -54,7 +54,7 @@ class AppMain extends LitElement {
       ${this.baseStyle}
       <h2>Pick a nickname:</h2>
       <div>
-        <input id="player-nick" type="text">
+        <input @keyup="${this.chooseNick}" id="player-nick" type="text">
         <button @click="${this.chooseNick}">Confirm</button>
       </div>
     `;
@@ -67,7 +67,7 @@ class AppMain extends LitElement {
       <button @click="${this.createGame}">Create a new game</button>
       <p>Or join an existing lobby by entering the game code below:</p>
       <div>
-        <input id="game-code" type="text">
+        <input @keyup="${this.joinGame}" id="game-code" type="text">
         <button @click="${this.joinGame}">Join</button>
       </div>
       ${this.gameCodeError != null ? html`<div error>${this.gameCodeError}</div>` : html``}
@@ -138,13 +138,19 @@ class AppMain extends LitElement {
     await this.createPlayer();
   }
 
-  async joinGame() {
+  async joinGame(event) {
+    if (event.keyCode && event.keyCode !== 13) {
+      return;
+    }
     this.gameCodeError = null;
     this.gameCode = this.shadowRoot.getElementById('game-code').value;
     await this.createPlayer();
   }
 
-  chooseNick() {
+  chooseNick(event) {
+    if (event.keyCode && event.keyCode !== 13) {
+      return;
+    }
     this.nick = this.shadowRoot.getElementById('player-nick').value;
   }
 
