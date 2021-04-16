@@ -1,5 +1,23 @@
 # Waste management game server
 
+## Requirements
+
+* NodeJS & npm
+* MongoDB running on port 27017
+
+### Install dependencies
+
+```
+apt-get install node mongodb
+```
+
+### Start & init the DB
+
+```
+sudo systemctl start mongod
+node scripts/createDb.js
+```
+
 ## Build
 
 ```
