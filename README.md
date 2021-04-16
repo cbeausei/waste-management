@@ -1,5 +1,9 @@
 # Waste management game server
 
+## Prototype
+
+https://waste-management.cbeausei.eu
+
 ## Requirements
 
 * NodeJS & npm
