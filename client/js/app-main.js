@@ -4,6 +4,7 @@ class AppMain extends LitElement {
   static get properties() {
     return {
       gameCode: {type: String},
+      gameCodeError: {type: String},
       playerId: {type: Number},
       players: {type: Array},
       started: {type: Boolean},
@@ -15,6 +16,7 @@ class AppMain extends LitElement {
     
     // State variables.
     this.gameCode = null;
+    this.gameCodeError = null;
     this.playerId = null;
     this.nick = null;
     this.started = false;
@@ -33,6 +35,9 @@ class AppMain extends LitElement {
       button:hover {
         cursor: pointer;
       }
+      [error] {
+        color: red;
+      }
     </style>
     `
   }
@@ -46,6 +51,7 @@ class AppMain extends LitElement {
         <input id="game-code" type="text">
         <button @click="${this.joinGame}">Join</button>
       </div>
+      ${this.gameCodeError != null ? html`<div error>${this.gameCodeError}</div>` : html``}
     `;
   }
 
@@ -86,7 +92,7 @@ class AppMain extends LitElement {
   }
 
   render() {
-    if (this.gameCode == null) {
+    if (this.gameCode == null || this.gameCodeError != null) {
       return this.renderLandingPage();
     }
     if (this.playerId == null) {
@@ -117,16 +123,22 @@ class AppMain extends LitElement {
   async createGame() {
     const response = await fetch('/game/create');
     const game = await response.json();
+    this.gameCodeError = null;
     this.gameCode = game.gameCode;
   }
 
   joinGame() {
+    this.gameCodeError = null;
     this.gameCode = this.shadowRoot.getElementById('game-code').value;
   }
 
   async createPlayer() {
     this.nick = this.shadowRoot.getElementById('player-nick').value;
     const info = await this.queryServer('/game/join', {nick: this.nick});
+    if (info.error) {
+      this.gameCodeError = info.error;
+      return;
+    }
     this.playerId = info.playerId;
     this.players = info.players;
     this.requestServerUpdate();

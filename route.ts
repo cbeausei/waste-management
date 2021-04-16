@@ -32,9 +32,15 @@ app.get('/game/create', (req, res) => {
 
 // Player joins a game.
 app.post('/game/join', jsonParser, async (req, res) => {
+  const gameCode = req.body.gameCode;
   const playerId = generatePlayerId();
-  const players = await joinGame(req.body.gameCode, req.body.nick, playerId);
-  res.send({playerId, players});
+  const gameExists = await doesGameExist(gameCode);
+  if (gameExists) {
+    const players = await joinGame(gameCode, req.body.nick, playerId);
+    res.send({playerId, players});
+  } else {
+    res.send({error: `No game found for the code ${gameCode}.`});
+  }
 });
 
 // Player starts a game.
@@ -60,6 +66,30 @@ function generateGameCode(): string {
 
 function generatePlayerId(): number {
   return Math.floor(Math.random() * 1000000000);
+}
+
+async function doesGameExist(gameCode: string): Promise<boolean> {
+  let client = null;
+  let gameExists = false;
+  try {
+    client = await MongoClient.connect(mongoUrl, opts);
+  } catch (err) {
+    throw err;
+  }
+  const db = client.db('mydb');
+  const gameQuery = {gameCode};
+  try {
+    const collection = db.collection('games');
+    const res = await collection.findOne(gameQuery);
+    if (res != null) {
+      gameExists = true;
+    }
+  } catch (err) {
+    throw err;
+  } finally {
+    client.close();
+  };
+  return gameExists;
 }
 
 function createGame(gameCode: string): void {
