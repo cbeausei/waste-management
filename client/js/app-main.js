@@ -22,6 +22,11 @@ class AppMain extends LitElement {
     this.nick = null;
     this.started = false;
     this.players = null;
+    this.gameData = null;
+    this.fetchGameData().then(gameData => {
+      console.log(gameData);
+      this.gameData = gameData;
+    });
 
     // Shared styles.
     this.baseStyle = html`
@@ -157,6 +162,12 @@ class AppMain extends LitElement {
     });
     const json = await response.json();
     return json;
+  }
+
+  async fetchGameData() {
+    const response = await fetch('/game/data');
+    const gameData = await response.json();
+    return gameData;
   }
 
   async createGame() {

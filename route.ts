@@ -1,6 +1,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import {Db} from './db';
+import {gameData} from './game-data';
 
 // App creation.
 const app = express();
@@ -14,10 +15,8 @@ const db = new Db();
 // Constants.
 const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
-// Include the JS client.
+// Serve the JS client.
 app.use('/js', express.static('client/js'));
-
-// Serve the JS client
 app.get('/', (req, res) => {
   res.sendFile(clientRoot + 'index.html');
 });
@@ -53,6 +52,11 @@ app.post('/game/start', jsonParser, async (req, res) => {
 app.post('/game/update', jsonParser, async (req, res) => {
   const update = await db.getGameUpdate(req.body.gameCode);
   res.send(update);
+});
+
+// Get game data.
+app.get('/game/data', (req, res) => {
+  res.send({gameData});
 });
 
 function generateGameCode(): string {
