@@ -6,17 +6,13 @@ const opts = {useUnifiedTopology: true};
 export class Db {
 
 async doesGameExist(gameCode: string): Promise<boolean> {
-  let client = null;
   let gameExists = false;
-  try {
-    client = await MongoClient.connect(mongoUrl, opts);
-  } catch (err) {
-    throw err;
-  }
-  const db = client.db('mydb');
+  let client;
+  try {client = await MongoClient.connect(mongoUrl, opts);}
+  catch (err) {throw err;}
+  const collection = client.db('mydb').collection('games');
   const gameQuery = {gameCode};
   try {
-    const collection = db.collection('games');
     const res = await collection.findOne(gameQuery);
     if (res != null) {
       gameExists = true;
@@ -25,55 +21,47 @@ async doesGameExist(gameCode: string): Promise<boolean> {
     throw err;
   } finally {
     client.close();
-  };
+  }
   return gameExists;
 }
 
-createGame(gameCode: string): void {
-  MongoClient.connect(mongoUrl, opts, (err: Error, db: any) => {
+async createGame(gameCode: string) {
+  let client: any = null;
+  try {client = await MongoClient.connect(mongoUrl, opts);}
+  catch (err) {throw err;}
+  const collection = client.db('mydb').collection('games');
+  const game = {gameCode, started: false};
+  collection.insertOne(game, (err: Error, res: any) => {
     if (err) throw err;
-    const dbo = db.db('mydb');
-    const game = {gameCode, started: false};
-    dbo.collection('games').insertOne(game, (err: Error, res: any) => {
-      if (err) throw err;
-      console.log(`Game ${gameCode} created.`);
-        db.close();
-    });
+    console.log(`Game ${gameCode} created.`);
+    client.close();
   });
 }
 
 async startGame(gameCode: string, playerId: number) {
   // TODO: check the player is allowed to start the game.
-  let client = null;
-  try {
-    client = await MongoClient.connect(mongoUrl, opts);
-  } catch (err) {
-    throw err;
-  }
-  const db = client.db('mydb');
+  let client;
+  try {client = await MongoClient.connect(mongoUrl, opts);}
+  catch (err) {throw err;}
+  const collection = client.db('mydb').collection('games');
   const gameQuery = {gameCode};
   try {
-    const collection = db.collection('games');
     await collection.updateOne(gameQuery, {$set: {started: true}});
   } catch (err) {
     throw err;
   } finally {
     client.close();
-  };
+  }
 }
 
 async joinGame(gameCode: string, nick: string, playerId: number) {
-  let players = [];
-  let client = null;
-  try {
-    client = await MongoClient.connect(mongoUrl, opts);
-  } catch (err) {
-    throw err;
-  }
-  const db = client.db('mydb');
+  let players: any[] = [];
+  let client;
+  try {client = await MongoClient.connect(mongoUrl, opts);}
+  catch (err) {throw err;}
+  const collection = client.db('mydb').collection('games');
   const gameQuery = {gameCode};
   try {
-    const collection = db.collection('games');
     const res = await collection.findOne(gameQuery);
     players = res.players || [];
     players.push({nick, playerId});
@@ -88,17 +76,13 @@ async joinGame(gameCode: string, nick: string, playerId: number) {
 
 async getGameUpdate(gameCode: string) {
   let players = [];
-  let client = null;
   let update = {};
-  try {
-    client = await MongoClient.connect(mongoUrl, opts);
-  } catch (err) {
-    throw err;
-  }
-  const db = client.db('mydb');
+  let client;
+  try {client = await MongoClient.connect(mongoUrl, opts);}
+  catch (err) {throw err;}
+  const collection = client.db('mydb').collection('games');
   const gameQuery = {gameCode};
   try {
-    const collection = db.collection('games');
     const res = await collection.findOne(gameQuery);
     update = {
       ...update,
