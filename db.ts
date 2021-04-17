@@ -18,7 +18,7 @@ export class Db {
   }
 
   getInitialState() {
-    return {started: false, players: []};
+    return {started: false, players: [], ready: []};
   }
 
   async doesGameExist(gameCode: string): Promise<boolean> {
@@ -38,15 +38,33 @@ export class Db {
     });
   }
 
-  async startGame(gameCode: string, playerId: number) {
-    // TODO: check the player is allowed to start the game.
-    const gameQuery = {gameCode};
+  async switchReadiness(gameCode: string, playerId: number) {
+    try {
+      const game = await this.collection.findOne({gameCode});
+      let readyCount = 0;
+      for (let i = 0; i < game.playerIds.length; ++i) {
+        if (game.playerIds[i] === playerId) {
+          game.state.ready[i] = !game.state.ready[i];
+          await this.collection.updateOne({gameCode}, {$set: game});
+        }
+        if (game.state.ready[i]) {
+          readyCount += 1;
+        }
+      }
+      if (readyCount === game.playerIds.length) {
+        await this.startGame(gameCode);
+      }
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  async startGame(gameCode: string) {
     try {
       const game = await this.collection.findOne({gameCode});
       game.state.started = true;
       game.state.playerCount = game.playerIds.length;
-      console.log(game);
-      await this.collection.updateOne(gameQuery, {$set: game});
+      await this.collection.updateOne({gameCode}, {$set: game});
     } catch (err) {
       throw err;
     }
@@ -59,6 +77,7 @@ export class Db {
         return new Error('This game has already started.');
       }
       game.playerIds.push(playerId);
+      game.state.ready.push(false);
       game.state.players.push(nick);
       await this.collection.updateOne({gameCode}, {$set: game});
     } catch (err) {
@@ -69,7 +88,11 @@ export class Db {
   async getGameUpdate(gameCode: string) {
     try {
       const game = await this.collection.findOne({gameCode});
-      return game.state;
+      if (game != null) {
+        return game.state;
+      } else {
+        return new Error(`Game not found with code ${gameCode}.`);
+      }
     } catch (err) {
       throw err;
     }

@@ -42,8 +42,8 @@ app.post('/game/join', jsonParser, async (req, res) => {
 });
 
 // Player starts a game.
-app.post('/game/start', jsonParser, async (req, res) => {
-  await db.startGame(req.body.gameCode, req.body.playerId);
+app.post('/game/ready', jsonParser, async (req, res) => {
+  await db.switchReadiness(req.body.gameCode, req.body.playerId);
   res.send({status: 'Success'});
 });
 

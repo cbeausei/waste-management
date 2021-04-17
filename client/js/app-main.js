@@ -7,9 +7,8 @@ class AppMain extends LitElement {
       gameCodeError: {type: String},
       nick: {type: String},
       playerId: {type: Number},
-      playerCount: {type: Number},
-      players: {type: Array},
-      started: {type: Boolean},
+      ready: {type: Boolean},
+      state: {type: Object},
     }
   }
 
@@ -20,14 +19,14 @@ class AppMain extends LitElement {
     this.gameCode = null;
     this.gameCodeError = null;
     this.playerId = null;
-    this.playerCount = null;
     this.nick = null;
-    this.started = false;
-    this.players = null;
+    this.state = null;
+    this.ready = false;
     this.gameData = null;
     this.fetchGameData().then(gameData => {
       this.gameData = gameData;
     });
+    this.requestServerUpdate();
 
     // Shared styles.
     this.baseStyle = html`
@@ -83,7 +82,13 @@ class AppMain extends LitElement {
       ${this.gameCodeError != null ? html`<div error>${this.gameCodeError}</div>` : html``}
     `;
   }
-
+  
+  renderWaitingGameCreationPage() {
+    return html`
+      ${this.baseStyle}
+      <h2>Creating game, please wait a few seconds...</h2>
+    `;
+  }
 
   renderLobbyPage() {
     return html`
@@ -103,20 +108,23 @@ class AppMain extends LitElement {
       </p>
       <h2>Players connected</h2>
       <ul>
-        ${this.players.map(nick => html`
+        ${this.state.players.map((nick, i) => html`
           <li>
             ${nick === this.nick ? html`<span nick>${nick}</span>` : html`<span>${nick}</span>`}
+            ${this.state.ready[i] ? html`<b>READY</b>` : html`Waiting...`}
           </li>
         `)}
       </ul>
-      ${this.players.length > 1 ? html`<button @click="${this.startGame}">Start game</button>` : html``}
+      <button @click="${this.switchReadiness}">
+        ${!this.ready ? html`I'm ready` : html`Wait`}
+      </button>
     `;
   }
 
   renderGamePage() {
     return html`
       ${this.baseStyle}
-      <p>Game is starting! There are ${this.playerCount} players registered.</p>
+      <p>Game is starting! There are ${this.state.playerCount} players registered.</p>
     `
   }
 
@@ -127,7 +135,10 @@ class AppMain extends LitElement {
     if (this.gameCode == null || this.gameCodeError != null) {
       return this.renderGameSelectionPage();
     }
-    if (!this.gameStarted) {
+    if (this.state == null) {
+      return this.renderWaitingGameCreationPage();
+    }
+    if (!this.state.started) {
       return this.renderLobbyPage();
     }
     return this.renderGamePage();
@@ -205,25 +216,19 @@ class AppMain extends LitElement {
       return;
     }
     this.playerId = info.playerId;
-    this.requestServerUpdate();
   }
 
-  async startGame() {
-    await this.queryServer('/game/start');
+  async switchReadiness() {
+    this.ready = !this.ready;
+    await this.queryServer('/game/ready');
   }
 
   async requestServerUpdate() {
     setTimeout(() => this.requestServerUpdate(), 1000);
-    const update = await this.queryServer('/game/update');
-    this.handleNewState(update);
+    if (this.gameCode != null) {
+      this.state = await this.queryServer('/game/update');
+    }
   } 
-
-  handleNewState(state) {
-    console.log(state);
-    this.playerCount = state.playerCount;
-    this.players = state.players;
-    this.gameStarted = state.started;      
-  }
 }
 
 customElements.define('app-main', AppMain);
