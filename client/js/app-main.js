@@ -7,6 +7,7 @@ class AppMain extends LitElement {
       gameCodeError: {type: String},
       nick: {type: String},
       playerId: {type: Number},
+      playerCount: {type: Number},
       players: {type: Array},
       started: {type: Boolean},
     }
@@ -19,12 +20,12 @@ class AppMain extends LitElement {
     this.gameCode = null;
     this.gameCodeError = null;
     this.playerId = null;
+    this.playerCount = null;
     this.nick = null;
     this.started = false;
     this.players = null;
     this.gameData = null;
     this.fetchGameData().then(gameData => {
-      console.log(gameData);
       this.gameData = gameData;
     });
 
@@ -115,7 +116,7 @@ class AppMain extends LitElement {
   renderGamePage() {
     return html`
       ${this.baseStyle}
-      <p>Game is starting! There are ${this.players.length} players registered.</p>
+      <p>Game is starting! There are ${this.playerCount} players registered.</p>
     `
   }
 
@@ -204,28 +205,24 @@ class AppMain extends LitElement {
       return;
     }
     this.playerId = info.playerId;
-    this.players = info.players;
     this.requestServerUpdate();
   }
 
   async startGame() {
-    const update = await this.queryServer('/game/start');
-    this.handleUpdate(update);
+    await this.queryServer('/game/start');
   }
 
   async requestServerUpdate() {
     setTimeout(() => this.requestServerUpdate(), 1000);
     const update = await this.queryServer('/game/update');
-    this.handleUpdate(update);
+    this.handleNewState(update);
   } 
 
-  handleUpdate(update) {
-    if (update.players) {
-      this.players = update.players;
-    }
-    if (update.started === true) {
-      this.gameStarted = true;      
-    }
+  handleNewState(state) {
+    console.log(state);
+    this.playerCount = state.playerCount;
+    this.players = state.players;
+    this.gameStarted = state.started;      
   }
 }
 

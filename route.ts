@@ -34,8 +34,8 @@ app.post('/game/join', jsonParser, async (req, res) => {
   const playerId = generatePlayerId();
   const gameExists = await db.doesGameExist(gameCode);
   if (gameExists) {
-    const players = await db.joinGame(gameCode, req.body.nick, playerId);
-    res.send({playerId, players});
+    await db.joinGame(gameCode, req.body.nick, playerId);
+    res.send({playerId});
   } else {
     res.send({error: `No game found for the code ${gameCode}.`});
   }
@@ -44,8 +44,7 @@ app.post('/game/join', jsonParser, async (req, res) => {
 // Player starts a game.
 app.post('/game/start', jsonParser, async (req, res) => {
   await db.startGame(req.body.gameCode, req.body.playerId);
-  const update = await db.getGameUpdate(req.body.gameCode);
-  res.send(update);
+  res.send({status: 'Success'});
 });
 
 // Game update.
