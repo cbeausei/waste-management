@@ -4,103 +4,74 @@ const mongoUrl = 'mongodb://localhost:27017/';
 const opts = {useUnifiedTopology: true};
 
 export class Db {
+  client: any = null;
+  collection: any = null;
 
-async doesGameExist(gameCode: string): Promise<boolean> {
-  let gameExists = false;
-  let client;
-  try {client = await MongoClient.connect(mongoUrl, opts);}
-  catch (err) {throw err;}
-  const collection = client.db('mydb').collection('games');
-  const gameQuery = {gameCode};
-  try {
-    const res = await collection.findOne(gameQuery);
-    if (res != null) {
-      gameExists = true;
-    }
-  } catch (err) {
-    throw err;
-  } finally {
-    client.close();
+  constructor() {
+    MongoClient.connect(mongoUrl, opts, (err: Error, client: any) => {
+      if (err) {
+        throw err;
+      }
+      this.client = client;
+      this.collection = client.db('mydb').collection('games');
+    });
   }
-  return gameExists;
-}
 
-async createGame(gameCode: string) {
-  let client: any = null;
-  try {client = await MongoClient.connect(mongoUrl, opts);}
-  catch (err) {throw err;}
-  const collection = client.db('mydb').collection('games');
-  const game = {gameCode, started: false};
-  collection.insertOne(game, (err: Error, res: any) => {
-    if (err) throw err;
-    console.log(`Game ${gameCode} created.`);
-    client.close();
-  });
-}
-
-async startGame(gameCode: string, playerId: number) {
-  // TODO: check the player is allowed to start the game.
-  let client;
-  try {client = await MongoClient.connect(mongoUrl, opts);}
-  catch (err) {throw err;}
-  const collection = client.db('mydb').collection('games');
-  const gameQuery = {gameCode};
-  try {
-    await collection.updateOne(gameQuery, {$set: {started: true}});
-  } catch (err) {
-    throw err;
-  } finally {
-    client.close();
-  }
-}
-
-async joinGame(gameCode: string, nick: string, playerId: number) {
-  let players: any[] = [];
-  let client;
-  try {client = await MongoClient.connect(mongoUrl, opts);}
-  catch (err) {throw err;}
-  const collection = client.db('mydb').collection('games');
-  const gameQuery = {gameCode};
-  try {
-    const res = await collection.findOne(gameQuery);
-    players = res.players || [];
-    players.push({nick, playerId});
-    await collection.updateOne(gameQuery, {$set: {started: false, players}});
-  } catch (err) {
-    throw err;
-  } finally {
-    client.close();
-  };
-  return players.map((player: any) => player.nick);
-}
-
-async getGameUpdate(gameCode: string) {
-  let players = [];
-  let update = {};
-  let client;
-  try {client = await MongoClient.connect(mongoUrl, opts);}
-  catch (err) {throw err;}
-  const collection = client.db('mydb').collection('games');
-  const gameQuery = {gameCode};
-  try {
-    const res = await collection.findOne(gameQuery);
-    update = {
-      ...update,
-      started: res.started,
-    }
-    players = res?.players || null;
-  } catch (err) {
-    throw err;
-  } finally {
-    client.close();
-  };
-  if (players) {
-    update = {
-      ...update,
-      players: players.map((player: any) => player.nick),
+  async doesGameExist(gameCode: string): Promise<boolean> {
+    try {
+      const res = await this.collection.findOne({gameCode});
+      return res != null;
+    } catch (err) {
+      throw err;
     }
   }
-  return update;
-}
 
+  async createGame(gameCode: string) {
+    const game = {gameCode, started: false};
+    this.collection.insertOne(game, (err: Error, res: any) => {
+      if (err) throw err;
+      console.log(`Game ${gameCode} created.`);
+    });
+  }
+
+  async startGame(gameCode: string, playerId: number) {
+    // TODO: check the player is allowed to start the game.
+    const gameQuery = {gameCode};
+    try {
+      await this.collection.updateOne(gameQuery, {$set: {started: true}});
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  async joinGame(gameCode: string, nick: string, playerId: number) {
+    try {
+      const res = await this.collection.findOne({gameCode});
+      let players = res.players || [];
+      players.push({nick, playerId});
+      await this.collection.updateOne({gameCode}, {$set: {started: false, players}});
+      return players.map((player: any) => player.nick);
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  async getGameUpdate(gameCode: string) {
+    try {
+      const res = await this.collection.findOne({gameCode});
+      let update: any = {
+        started: res.started,
+      }
+      let players = res?.players || null;
+      if (players) {
+        update = {
+          ...update,
+          players: players.map((player: any) => player.nick),
+        }
+      }
+      return update;
+    } catch (err) {
+      throw err;
+    }
+  }
 }
