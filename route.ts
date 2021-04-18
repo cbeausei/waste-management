@@ -24,8 +24,12 @@ app.get('/', (req, res) => {
 // Game creation.
 app.get('/game/create', (req, res) => {
   const gameCode = generateGameCode();
-  db.createGame(gameCode);
-  res.send({gameCode});
+  try {
+    db.createGame(gameCode);
+    res.send({gameCode});
+  } catch (err) {
+    res.status(403).end(err.message);
+  }
 });
 
 // Player joins a game.
@@ -42,14 +46,22 @@ app.post('/game/join', jsonParser, async (req, res) => {
 
 // Player starts a game.
 app.post('/game/ready', jsonParser, async (req, res) => {
-  await db.switchReadiness(req.body.gameCode, req.body.playerId);
-  res.send({status: 'Success'});
+  try {
+    await db.switchReadiness(req.body.gameCode, req.body.playerId);
+    res.send({status: 'Success'});
+  } catch (err) {
+    res.status(403).end(err.message);
+  }
 });
 
 // Game update.
 app.post('/game/update', jsonParser, async (req, res) => {
-  const update = await db.getGameUpdate(req.body.gameCode);
-  res.send(update);
+  try {
+    const update = await db.getGameUpdate(req.body.gameCode);
+    res.send(update);
+  } catch (err) {
+    res.status(403).end(err.message);
+  }
 });
 
 // Get game data.
