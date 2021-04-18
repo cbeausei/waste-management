@@ -32,12 +32,11 @@ app.get('/game/create', (req, res) => {
 app.post('/game/join', jsonParser, async (req, res) => {
   const gameCode = req.body.gameCode;
   const playerId = generatePlayerId();
-  const gameExists = await db.doesGameExist(gameCode);
-  if (gameExists) {
+  try {
     await db.joinGame(gameCode, req.body.nick, playerId);
     res.send({playerId});
-  } else {
-    res.send({error: `No game found for the code ${gameCode}.`});
+  } catch (err) {
+    res.status(403).end(err.message);
   }
 });
 

@@ -172,6 +172,10 @@ class AppMain extends LitElement {
         playerId: this.playerId,
       }),
     });
+    if (response.status !== 200) {
+      const message = await response.text();
+      throw new Error(message);
+    }
     const json = await response.json();
     return json;
   }
@@ -210,12 +214,13 @@ class AppMain extends LitElement {
   }
 
   async createPlayer() {
-    const info = await this.queryServer('/game/join', {nick: this.nick});
-    if (info.error) {
-      this.gameCodeError = info.error;
-      return;
-    }
-    this.playerId = info.playerId;
+    this.queryServer('/game/join', {nick: this.nick}).then(info => {
+      this.playerId = info.playerId;
+      // TODO: update URL.
+    }, err => {
+      this.gameCodeError = err.message;
+      // TODO: clear URL.
+    });
   }
 
   async switchReadiness() {

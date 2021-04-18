@@ -73,8 +73,11 @@ export class Db {
   async joinGame(gameCode: string, nick: string, playerId: number) {
     try {
       const game = await this.collection.findOne({gameCode});
+      if (!game || !game.state) {
+        throw new Error(`No game found with code ${gameCode}.`);
+      }
       if (game.state.started) {
-        return new Error('This game has already started.');
+        throw new Error('This game has already started.');
       }
       game.playerIds.push(playerId);
       game.state.ready.push(false);
