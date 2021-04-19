@@ -45,8 +45,8 @@ app.post('/game/join', jsonParser, async (req, res) => {
   const gameCode = req.body.gameCode;
   const playerId = generatePlayerId();
   try {
-    await db.joinGame(gameCode, req.body.nick, playerId);
-    res.send({playerId});
+    const playerIndex = await db.joinGame(gameCode, req.body.nick, playerId);
+    res.send({playerId, playerIndex});
   } catch (err) {
     res.status(403).end(err.message);
   }
@@ -65,7 +65,7 @@ app.post('/game/ready', jsonParser, async (req, res) => {
 // Game update.
 app.post('/game/update', jsonParser, async (req, res) => {
   try {
-    const update = await db.getGameUpdate(req.body.gameCode);
+    const update = await db.getGameUpdate(req.body.gameCode, req.body.playerId);
     res.send(update);
   } catch (err) {
     res.status(403).end(err.message);

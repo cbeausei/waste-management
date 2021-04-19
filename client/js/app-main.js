@@ -22,6 +22,7 @@ class AppMain extends LitElement {
     this.gameCode = null;
     this.gameCodeError = null;
     this.playerId = null;
+    this.playerIndex = null;
     this.nick = null;
     this.state = null;
     this.ready = false;
@@ -116,9 +117,9 @@ class AppMain extends LitElement {
       <ul>
         ${this.state.players.map((nick, i) => html`
           <li>
-            ${nick === this.nick ? html`<span nick>${nick}</span>` : html`<span>${nick}</span>`}
+            ${i === this.playerIndex ? html`<span nick>${nick}</span>` : html`<span>${nick}</span>`}
             (${this.state.ready[i] ? html`<b>READY</b>` : html`not ready`})
-            ${nick === this.nick ? html`
+            ${i === this.playerIndex ? html`
               <button @click="${this.switchReadiness}">
                 ${!this.ready ? html`I'm ready` : html`Wait`}
               </button>
@@ -224,6 +225,7 @@ class AppMain extends LitElement {
   async createPlayer() {
     this.queryServer('/game/join', {nick: this.nick}).then(info => {
       this.playerId = info.playerId;
+      this.playerIndex = info.playerIndex;
       // TODO: update URL.
     }, err => {
       console.log(err);
@@ -241,7 +243,9 @@ class AppMain extends LitElement {
   async requestServerUpdate() {
     setTimeout(() => this.requestServerUpdate(), this.updateRateMs);
     if (this.gameCode != null) {
-      this.state = await this.queryServer('/game/update');
+      const update = await this.queryServer('/game/update');
+      this.state = update.state;
+      this.playerIndex = update.playerIndex;
     }
   }
 

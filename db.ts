@@ -29,6 +29,10 @@ export class Db {
     return new Error(`No game found with code ${gameCode}.`);
   }
 
+  playerNotInGameError(gameCode: string) {
+    return new Error(`This player can't access the game with code ${gameCode}.`);
+  }
+
   async createGame(gameCode: string) {
     const newGame = {gameCode, playerIds: [], state: this.getInitialState()};
     try {
@@ -105,6 +109,7 @@ export class Db {
       game.state.ready.push(false);
       game.state.players.push(nick);
       await this.collection.updateOne({gameCode}, {$set: game});
+      return game.playerIds.length - 1;
     } catch (err) {
       if (err.name === 'MongoError') {
         console.error(err);
@@ -115,14 +120,22 @@ export class Db {
     }
   }
 
-  async getGameUpdate(gameCode: string) {
+  async getGameUpdate(gameCode: string, playerId: number) {
     try {
       const game = await this.collection.findOne({gameCode});
-      if (!game?.state) {
+      if (!game?.state || !game?.playerIds) {
         throw this.gameNotFoundError(gameCode);
-      } else {
-        return game.state;
       }
+      let playerIndex = null;
+      for (let i = 0; i < game.playerIds.length; ++i) {
+        if (playerId === game.playerIds[i]) {
+          playerIndex = i;
+        }
+      }
+      if (playerIndex == null) {
+        throw this.playerNotInGameError(gameCode);
+      }
+      return {state: game.state, playerIndex};
     } catch (err) {
       if (err.name === 'MongoError') {
         console.error(err);
