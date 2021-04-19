@@ -34,7 +34,11 @@ class AppMain extends LitElement {
     // Shared templates.
     this.baseStyle = html`
     <style>
+      *, *:before, *:after {
+        box-sizing: inherit;
+      }
       :host {
+        box-sizing: border-box;
         display: flex;
         flex-direction: column;
         height: 100%;

@@ -22,41 +22,48 @@ class DebugClient extends LitElement {
     return html`
       <style>
         :host {
+          --theme-on: darkseagreen;
+          --theme-off: lavender;
           display: flex;
           flex-direction: column;
           height: 100%;
           padding: 10px;
         }
+        button:hover {
+          cursor: pointer;
+        }
         [container] {
           display: flex;
           flex: 1;
           flex-direction: column;
+          overflow-y: auto;
+        }
+        [app-header] {
+          background-color: var(--theme-off);
+          display: flex;
+          justify-content: center;
+          padding-bottom: 0;
+        }
+        [app-header]:hover {
+          cursor: pointer;
+          opacity: 0.8;
+        }
+        [app-header][on] {
+          background-color: var(--theme-on);
+          padding-bottom: 5px;
         }
         [app-container] {
-          border: solid 1px black;
+          border: solid 5px var(--theme-off);
+          border-radius: 5px;
           margin: 5px 0;
+          flex: 0;
+        }
+        [app-container][on] {
+          border-color: var(--theme-on);
           flex: 1;
         }
         [spawn] {
           margin: 5px 0;
-        }
-        [tabs] {
-          display: flex;
-        }
-        [tabs] > * {
-          background-color: lavender;
-          border-radius: 3px;
-          display: flex;
-          flex: 1;
-          justify-content: center;
-          margin: 0 5px;
-        }
-        [tabs] > *:hover {
-          cursor: pointer;
-          opacity: 0.8;
-        }
-        [on] {
-          background-color: darkseagreen;
         }
       </style>
       
@@ -68,18 +75,17 @@ class DebugClient extends LitElement {
         <button @click="${this.spawnClient}">Spawn client</button>
       </div>
 
-      <!-- Tabs -->
-      <div tabs>
-        ${this.clients.map((active, i) => html`
-          <span ?on=${active} @click="${() => this.tabSwitch(i)}">Client ${i + 1}</span>
-        `)}
-      </div>
-
       <!-- Clients -->
       <div container>
-        ${this.clients.map(active => html`
-          <div app-container ?hidden=${!active}>
-            <app-main></app-main>
+        ${this.clients.map((active, i) => html`
+          <div app-container ?on=${active}>
+            <div app-header ?on=${active}
+                 @click="${() => this.tabSwitch(i)}">
+              <span>Client ${i + 1}</span>
+            </div>
+            <div ?hidden=${!active}>
+              <app-main></app-main>
+            </div>
           </div>
         `)}
       </div>
