@@ -1,4 +1,5 @@
 // MongoDB setup.
+import {gameData} from './game-data';
 const MongoClient = require('mongodb').MongoClient;
 const mongoUrl = 'mongodb://localhost:27017/';
 const opts = {useUnifiedTopology: true};
@@ -18,7 +19,7 @@ export class Db {
   }
 
   getInitialState() {
-    return {started: false, players: [], ready: []};
+    return {started: false, players: [], ready: [], playerTurn: 0, playerLocation: []};
   }
 
   internalError() {
@@ -108,6 +109,7 @@ export class Db {
       game.playerIds.push(playerId);
       game.state.ready.push(false);
       game.state.players.push(nick);
+      game.state.playerLocation.push(gameData.cityStart);
       await this.collection.updateOne({gameCode}, {$set: game});
       return game.playerIds.length - 1;
     } catch (err) {

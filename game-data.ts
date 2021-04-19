@@ -24,6 +24,7 @@ export const gameData = {
     'Kyoto',
     'Sydney',
   ],
+  cityStart: 0,
   wasteCount: 3,
   wasteNames: ['ménager', 'naturel', 'industriel'],
   supportCount: 3,

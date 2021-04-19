@@ -133,7 +133,15 @@ class AppMain extends LitElement {
   renderGamePage() {
     return html`
       ${this.baseStyle}
-      <p>Game is starting! There are ${this.state.playerCount} players registered.</p>
+      <style>
+        
+      </style>
+
+      <div>
+        ${this.state.playerTurn === this.playerIndex
+            ? html`Your turn`
+            : html`${this.state.players[this.state.playerTurn]}'s turn`}
+      </div>
     `
   }
 
