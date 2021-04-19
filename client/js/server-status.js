@@ -60,7 +60,10 @@ class ServerStatus extends LitElement {
   async pingServer() {
     setTimeout(() => this.pingServer(), this.pingRateMs);
     const start = Date.now();
-    fetch('/ping').then(_ => {
+    fetch('/ping').then(response => {
+      if (!response.ok) {
+        throw new Error();
+      }
       this.online = true;
       this.latency = Date.now() - start;
       if (this.latency < 20) {
