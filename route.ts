@@ -18,7 +18,7 @@ const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 // Serve the JS client.
 app.use('/js', express.static('client/js'));
 app.get('/', (req, res) => {
-  res.sendFile(clientRoot + 'index.html');
+  res.sendFile(clientRoot + 'client.html');
 });
 
 // Server ping.
