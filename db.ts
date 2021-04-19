@@ -36,7 +36,7 @@ export class Db {
       console.log(`Game ${gameCode} created.`);
     } catch (err) {
       console.error(err);
-      return this.internalError();
+      throw this.internalError();
     }
   }
 
@@ -44,7 +44,7 @@ export class Db {
     try {
       const game = await this.collection.findOne({gameCode});
       if (!game?.state) {
-        return this.gameNotFoundError(gameCode);
+        throw this.gameNotFoundError(gameCode);
       }
       let readyCount = 0;
       for (let i = 0; i < game.playerIds.length; ++i) {
@@ -61,7 +61,7 @@ export class Db {
       }
     } catch (err) {
       console.error(err);
-      return this.internalError();
+      throw this.internalError();
     }
   }
 
@@ -69,14 +69,14 @@ export class Db {
     try {
       const game = await this.collection.findOne({gameCode});
       if (!game?.state) {
-        return this.gameNotFoundError(gameCode);
+        throw this.gameNotFoundError(gameCode);
       }
       game.state.started = true;
       game.state.playerCount = game.playerIds.length;
       await this.collection.updateOne({gameCode}, {$set: game});
     } catch (err) {
       console.error(err);
-      return this.internalError();
+      throw this.internalError();
     }
   }
 
@@ -84,7 +84,7 @@ export class Db {
     try {
       const game = await this.collection.findOne({gameCode});
       if (!game?.state) {
-        return this.gameNotFoundError(gameCode);
+        throw this.gameNotFoundError(gameCode);
       }
       if (game.state.started) {
         throw new Error('This game has already started.');
@@ -103,7 +103,7 @@ export class Db {
     try {
       const game = await this.collection.findOne({gameCode});
       if (!game?.state) {
-        return this.gameNotFoundError(gameCode);
+        throw this.gameNotFoundError(gameCode);
       } else {
         return game.state;
       }
