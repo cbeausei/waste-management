@@ -35,8 +35,12 @@ export class Db {
       await this.collection.insertOne(newGame);
       console.log(`Game ${gameCode} created.`);
     } catch (err) {
-      console.error(err);
-      throw this.internalError();
+      if (err.name === 'MongoError') {
+        console.error(err);
+        throw this.internalError();
+      } else {
+        throw err;
+      }
     }
   }
 
@@ -60,8 +64,12 @@ export class Db {
         await this.startGame(gameCode);
       }
     } catch (err) {
-      console.error(err);
-      throw this.internalError();
+      if (err.name === 'MongoError') {
+        console.error(err);
+        throw this.internalError();
+      } else {
+        throw err;
+      }
     }
   }
 
@@ -75,8 +83,12 @@ export class Db {
       game.state.playerCount = game.playerIds.length;
       await this.collection.updateOne({gameCode}, {$set: game});
     } catch (err) {
-      console.error(err);
-      throw this.internalError();
+      if (err.name === 'MongoError') {
+        console.error(err);
+        throw this.internalError();
+      } else {
+        throw err;
+      }
     }
   }
 
@@ -94,8 +106,12 @@ export class Db {
       game.state.players.push(nick);
       await this.collection.updateOne({gameCode}, {$set: game});
     } catch (err) {
-      console.error(err);
-      throw this.internalError();
+      if (err.name === 'MongoError') {
+        console.error(err);
+        throw this.internalError();
+      } else {
+        throw err;
+      }
     }
   }
 
@@ -108,8 +124,12 @@ export class Db {
         return game.state;
       }
     } catch (err) {
-      console.error(err);
-      throw this.internalError();
+      if (err.name === 'MongoError') {
+        console.error(err);
+        throw this.internalError();
+      } else {
+        throw err;
+      }
     }
   }
 }
