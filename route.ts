@@ -21,6 +21,11 @@ app.get('/', (req, res) => {
   res.sendFile(clientRoot + 'index.html');
 });
 
+// Server ping.
+app.get('/ping', (req, res) => {
+  res.send('pong');
+});
+
 // Game creation.
 app.get('/game/create', (req, res) => {
   const gameCode = generateGameCode();
