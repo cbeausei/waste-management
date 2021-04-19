@@ -45,7 +45,7 @@ class AppMain extends LitElement {
         padding: 8px;
         width:100%;
       }
-      h2, h3, p {
+      h2, h3, p, ul {
         margin: 5px 0;
       }
       button:hover {
@@ -56,6 +56,7 @@ class AppMain extends LitElement {
       }
       [nick] {
         color: blue;
+        font-weight: 700;
       }
       [bold] {
         font-weight: 700;
@@ -83,7 +84,9 @@ class AppMain extends LitElement {
     return html`
       ${this.baseStyle}
       <h3>Player <span nick>${this.nick}</span></h3>
-      <button @click="${this.createGame}">Create a new game</button>
+      <div>
+        <button @click="${this.createGame}">Create a new game</button>
+      </div>
       <p>Or enter a game code:</p>
       <div>
         <input @keyup="${this.joinGame}" id="game-code" type="text">
@@ -103,33 +106,26 @@ class AppMain extends LitElement {
   renderLobbyPage() {
     return html`
       ${this.baseStyle}
-      <h2>Waiting lobby.</h2>
-      <h3>Player <span nick>${this.nick}</span></h3>
+      <h2>Waiting lobby</h2>
       <p>
         Game code: <span bold>${this.gameCode}</span>
-        <button @click="${this.copyGameCode}">Copy code</button>
+        <button style="margin-left: 5px;" @click="${this.copyGameCode}">Copy code</button>
+        <button style="margin-left: 5px;" @click="${this.copyGameUrl}">Copy game URL</button>
       </p>
-      <p>
-        <div>Alternatively share the following URL:</div>
-        <div flex-line>
-          <span bold>${location.origin}/?gameCode=${this.gameCode}</span>
-          <button style="margin-left: 5px;" @click="${this.copyGameUrl}">Copy URL</button>
-        </div>
-      </p>
-      <h3>Players connected</h3>
+      <h3>Players</h3>
       <ul>
         ${this.state.players.map((nick, i) => html`
           <li>
             ${nick === this.nick ? html`<span nick>${nick}</span>` : html`<span>${nick}</span>`}
-            ${this.state.ready[i] ? html`<b>READY</b>` : html`Waiting...`}
+            (${this.state.ready[i] ? html`<b>READY</b>` : html`not ready`})
+            ${nick === this.nick ? html`
+              <button @click="${this.switchReadiness}">
+                ${!this.ready ? html`I'm ready` : html`Wait`}
+              </button>
+            ` : html``}
           </li>
         `)}
       </ul>
-      <div>
-        <button @click="${this.switchReadiness}">
-          ${!this.ready ? html`I'm ready` : html`Wait`}
-        </button>
-      </div>
     `;
   }
 
@@ -227,7 +223,6 @@ class AppMain extends LitElement {
 
   async createPlayer() {
     this.queryServer('/game/join', {nick: this.nick}).then(info => {
-      console.log(info);
       this.playerId = info.playerId;
       // TODO: update URL.
     }, err => {
