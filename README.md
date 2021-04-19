@@ -2,7 +2,8 @@
 
 ## Prototype
 
-https://waste-management.cbeausei.eu
+* single app: https://waste-management.cbeausei.eu
+* master debugging: https://waste-management.cbeausei.eu/debug
 
 ## Requirements
 
