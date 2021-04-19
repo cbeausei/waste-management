@@ -66,7 +66,7 @@ export class Db {
         }
       }
       if (readyCount === game.playerIds.length) {
-        await this.startGame(gameCode);
+        await this.maybeStartGame(gameCode);
       }
     } catch (err) {
       if (err.name === 'MongoError') {
@@ -78,11 +78,14 @@ export class Db {
     }
   }
 
-  async startGame(gameCode: string) {
+  async maybeStartGame(gameCode: string) {
     try {
       const game = await this.collection.findOne({gameCode});
       if (!game?.state) {
         throw this.gameNotFoundError(gameCode);
+      }
+      if (game.playerIds.length <= 1) {
+        return;
       }
       game.state.started = true;
       game.state.playerCount = game.playerIds.length;
