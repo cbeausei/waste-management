@@ -7,6 +7,7 @@ class DebugClient extends LitElement {
     return {
       clientCount: {type: Number},
       clients: {type: Array},
+      switchVar: {type: Boolean},
     }
   }
 
@@ -14,6 +15,7 @@ class DebugClient extends LitElement {
     super();
     this.clientCount = 0;
     this.clients = [];
+    this.switchVar = false;
   }
 
   render() {
@@ -22,15 +24,39 @@ class DebugClient extends LitElement {
         :host {
           display: flex;
           flex-direction: column;
+          height: 100%;
           padding: 10px;
         }
         [container] {
+          display: flex;
+          flex: 1;
+          flex-direction: column;
+        }
+        [app-container] {
           border: solid 1px black;
           margin: 5px 0;
           flex: 1;
         }
         [spawn] {
           margin: 5px 0;
+        }
+        [tabs] {
+          display: flex;
+        }
+        [tabs] > * {
+          background-color: lavender;
+          border-radius: 3px;
+          display: flex;
+          flex: 1;
+          justify-content: center;
+          margin: 0 5px;
+        }
+        [tabs] > *:hover {
+          cursor: pointer;
+          opacity: 0.8;
+        }
+        [on] {
+          background-color: darkseagreen;
         }
       </style>
       
@@ -42,18 +68,32 @@ class DebugClient extends LitElement {
         <button @click="${this.spawnClient}">Spawn client</button>
       </div>
 
+      <!-- Tabs -->
+      <div tabs>
+        ${this.clients.map((active, i) => html`
+          <span ?on=${active} @click="${() => this.tabSwitch(i)}">Client ${i + 1}</span>
+        `)}
+      </div>
+
       <!-- Clients -->
-      ${this.clients.map(client => html`
-        <div container>
-          <app-main></app-main>
-        </div>
-      `)}
+      <div container>
+        ${this.clients.map(active => html`
+          <div app-container ?hidden=${!active}>
+            <app-main></app-main>
+          </div>
+        `)}
+      </div>
     `;
   }
 
   spawnClient() {
     this.clients.push(true);
     this.clientCount += 1;
+  }
+
+  tabSwitch(i) {
+    this.clients[i] = !this.clients[i];
+    this.switchVar = !this.switchVar;
   }
 }
 
