@@ -138,9 +138,17 @@ class AppMain extends LitElement {
       </style>
 
       <div>
-        ${this.state.playerTurn === this.playerIndex
-            ? html`Your turn`
-            : html`${this.state.players[this.state.playerTurn]}'s turn`}
+        <p>I'm player <b>${this.nick}</b></p>
+        <p>My location: ${this.state.playerLocation[this.playerIndex]}</p>
+        ${this.state.playerTurn === this.playerIndex ? html`
+          <p>Your turn (actions left: ${this.state.remainingActions})</p>
+          <p>
+            <input id="city"></input>
+            <button @click="${this.changeCity}">Move to this city</button>
+          </p>
+        ` : html`
+          ${this.state.players[this.state.playerTurn]}'s turn
+        `}
       </div>
     `
   }
@@ -159,6 +167,16 @@ class AppMain extends LitElement {
       return this.renderLobbyPage();
     }
     return this.renderGamePage();
+  }
+
+  async changeCity() {
+    const newCityId = this.shadowRoot.getElementById('city').value;
+    await this.queryServer('/game/play', {
+      move: {
+        type: 'move',
+        cityId: newCityId,
+      },
+    });
   }
 
   async copyGameCode() {

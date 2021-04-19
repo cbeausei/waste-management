@@ -19,11 +19,26 @@ export class Db {
   }
 
   getInitialState() {
-    return {started: false, players: [], ready: [], playerTurn: 0, playerLocation: []};
+    return {
+      started: false,
+      players: [],
+      ready: [],
+      playerTurn: 0,
+      remainingActions: gameData.actionsPerTurn,
+      playerLocation: [],
+    };
   }
 
   internalError() {
     return new Error('Internal error.');
+  }
+
+  unimplementedError() {
+    return new Error(`This feature isn't implemented yet.`);
+  }
+
+  notPlayerTurnError() {
+    return new Error(`This isn't this player's turn.`);
   }
 
   gameNotFoundError(gameCode: string) {
@@ -149,5 +164,57 @@ export class Db {
         throw err;
       }
     }
+  }
+
+  async play(gameCode: string, playerId: number, move: any) {
+    try {
+      // Fetch the game, if it exists.
+      const game = await this.collection.findOne({gameCode});
+      if (!game?.state || !game?.playerIds) {
+        throw this.gameNotFoundError(gameCode);
+      }
+
+      // Check if this is the player's turn.
+      let playerIndex = null;
+      for (let i = 0; i < game.playerIds.length; ++i) {
+        if (playerId === game.playerIds[i]) {
+          playerIndex = i;
+        }
+      }
+      if (playerIndex == null) {
+        throw this.playerNotInGameError(gameCode);
+      }
+      if (game.state.playerTurn != playerIndex) {
+        throw this.notPlayerTurnError();
+      }
+
+      // Apply the move, if valid.
+      switch (move?.type) {
+        case 'move':
+          const newCityId = move?.cityId;
+          game.state.playerLocation[playerIndex] = newCityId;
+          break;
+        default:
+          throw this.unimplementedError();
+      }
+
+      // Update player turn.
+      game.state.remainingActions -= 1;
+      if (game.state.remainingActions <= 0) {
+        game.state.playerTurn = (game.state.playerTurn + 1) % game.playerIds.length;
+        game.state.remainingActions = gameData.actionsPerTurn;
+      }
+
+      // Save the new state.
+      await this.collection.updateOne({gameCode}, {$set: game});
+    } catch (err) {
+      if (err.name === 'MongoError') {
+        console.error(err);
+        throw this.internalError();
+      } else {
+        throw err;
+      }
+    }
+    
   }
 }
