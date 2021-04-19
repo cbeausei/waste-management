@@ -1,5 +1,4 @@
 import {LitElement, html} from 'https://unpkg.com/lit-element/lit-element.js?module';
-import './server-status.js';
 
 class AppMain extends LitElement {
   static get properties() {
@@ -65,7 +64,6 @@ class AppMain extends LitElement {
   renderNickSelectionPage() {
     return html`
       ${this.baseStyle}
-      <server-status></server-status>
       <h2>Pick a nickname:</h2>
       <div>
         <input @keyup="${this.chooseNick}" id="player-nick" type="text">
@@ -77,7 +75,6 @@ class AppMain extends LitElement {
   renderGameSelectionPage() {
     return html`
       ${this.baseStyle}
-      <server-status></server-status>
       <h2>Player <span nick>${this.nick}</span></h2>
       <button @click="${this.createGame}">Create a new game</button>
       <p>Or join an existing lobby by entering the game code below:</p>
@@ -92,7 +89,6 @@ class AppMain extends LitElement {
   renderWaitingGameCreationPage() {
     return html`
       ${this.baseStyle}
-      <server-status></server-status>
       <h2>Creating game, please wait a few seconds...</h2>
     `;
   }
@@ -100,7 +96,6 @@ class AppMain extends LitElement {
   renderLobbyPage() {
     return html`
       ${this.baseStyle}
-      <server-status></server-status>
       <h1>Waiting lobby.</h1>
       <h2>Player <span nick>${this.nick}</span></h2>
       <p>
@@ -132,7 +127,6 @@ class AppMain extends LitElement {
   renderGamePage() {
     return html`
       ${this.baseStyle}
-      <server-status></server-status>
       <p>Game is starting! There are ${this.state.playerCount} players registered.</p>
     `
   }

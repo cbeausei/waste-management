@@ -15,10 +15,13 @@ const db = new Db();
 // Constants.
 const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
-// Serve the JS client.
+// Serve the JS & debug clients.
 app.use('/js', express.static('client/js'));
 app.get('/', (req, res) => {
   res.sendFile(clientRoot + 'client.html');
+});
+app.get('/debug', (req, res) => {
+  res.sendFile(clientRoot + 'debug.html');
 });
 
 // Server ping.
