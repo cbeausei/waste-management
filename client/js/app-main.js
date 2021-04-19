@@ -42,8 +42,11 @@ class AppMain extends LitElement {
         display: flex;
         flex-direction: column;
         height: 100%;
-        padding: 10px;
+        padding: 8px;
         width:100%;
+      }
+      h2, h3, p {
+        margin: 5px 0;
       }
       button:hover {
         cursor: pointer;
@@ -68,7 +71,7 @@ class AppMain extends LitElement {
   renderNickSelectionPage() {
     return html`
       ${this.baseStyle}
-      <h2>Pick a nickname:</h2>
+      <h3>Pick a nickname:</h3>
       <div>
         <input @keyup="${this.chooseNick}" id="player-nick" type="text">
         <button @click="${this.chooseNick}">Confirm</button>
@@ -79,9 +82,9 @@ class AppMain extends LitElement {
   renderGameSelectionPage() {
     return html`
       ${this.baseStyle}
-      <h2>Player <span nick>${this.nick}</span></h2>
+      <h3>Player <span nick>${this.nick}</span></h3>
       <button @click="${this.createGame}">Create a new game</button>
-      <p>Or join an existing lobby by entering the game code below:</p>
+      <p>Or enter a game code:</p>
       <div>
         <input @keyup="${this.joinGame}" id="game-code" type="text">
         <button @click="${this.joinGame}">Join</button>
@@ -93,15 +96,15 @@ class AppMain extends LitElement {
   renderWaitingGameCreationPage() {
     return html`
       ${this.baseStyle}
-      <h2>Creating game, please wait a few seconds...</h2>
+      <p>Creating game, please wait a few seconds...</p>
     `;
   }
 
   renderLobbyPage() {
     return html`
       ${this.baseStyle}
-      <h1>Waiting lobby.</h1>
-      <h2>Player <span nick>${this.nick}</span></h2>
+      <h2>Waiting lobby.</h2>
+      <h3>Player <span nick>${this.nick}</span></h3>
       <p>
         Game code: <span bold>${this.gameCode}</span>
         <button @click="${this.copyGameCode}">Copy code</button>
@@ -113,7 +116,7 @@ class AppMain extends LitElement {
           <button style="margin-left: 5px;" @click="${this.copyGameUrl}">Copy URL</button>
         </div>
       </p>
-      <h2>Players connected</h2>
+      <h3>Players connected</h3>
       <ul>
         ${this.state.players.map((nick, i) => html`
           <li>
@@ -122,9 +125,11 @@ class AppMain extends LitElement {
           </li>
         `)}
       </ul>
-      <button @click="${this.switchReadiness}">
-        ${!this.ready ? html`I'm ready` : html`Wait`}
-      </button>
+      <div>
+        <button @click="${this.switchReadiness}">
+          ${!this.ready ? html`I'm ready` : html`Wait`}
+        </button>
+      </div>
     `;
   }
 
