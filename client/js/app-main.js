@@ -67,6 +67,9 @@ class AppMain extends LitElement {
         align-items: center;
         display: flex;
       }
+      [red] {
+        color: red;
+      }
     </style>
     `;
   }
@@ -140,11 +143,15 @@ class AppMain extends LitElement {
 
       <div>
         <p>I'm player <b>${this.nick}</b></p>
-        <p>My location: ${this.state.playerLocation[this.playerIndex]}</p>
+        <p>I'm at <b>${this.gameData.cityNames[this.state.playerLocation[this.playerIndex]]}</b></p>
         ${this.state.playerTurn === this.playerIndex ? html`
-          <p>Your turn (actions left: ${this.state.remainingActions})</p>
+          <p>Your turn (actions left: <b red>${this.state.remainingActions}</b>)</p>
           <p>
-            <input id="city"></input>
+            <select id="city-select">
+              ${this.gameData.cityNames.map((city, i) => html`
+                <option value=${i}>${city}</option>
+              `)}
+            </select>
             <button @click="${this.changeCity}">Move to this city</button>
           </p>
         ` : html`
@@ -171,7 +178,7 @@ class AppMain extends LitElement {
   }
 
   async changeCity() {
-    const newCityId = this.shadowRoot.getElementById('city').value;
+    const newCityId = this.shadowRoot.getElementById('city-select').value;
     await this.queryServer('/game/play', {
       move: {
         type: 'move',
@@ -218,8 +225,8 @@ class AppMain extends LitElement {
 
   async fetchGameData() {
     const response = await fetch('/game/data');
-    const gameData = await response.json();
-    return gameData;
+    const json = await response.json();
+    return json.gameData;
   }
 
   async createGame() {
