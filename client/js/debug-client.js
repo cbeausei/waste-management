@@ -73,18 +73,28 @@ class DebugClient extends LitElement {
       <!-- Spawn client button -->
       <div spawn>
         <button @click="${this.spawnClient}">Spawn client</button>
+        <button @click="${() =>this.startGame(4, false)}">Start 4 players lobby</button>
+        <button @click="${() =>this.startGame(4, true)}">Start 4 players game</button>
       </div>
 
       <!-- Clients -->
       <div container>
-        ${this.clients.map((active, i) => html`
-          <div app-container ?on=${active}>
-            <div app-header ?on=${active}
+        ${this.clients.map((client, i) => html`
+          <div app-container ?on=${client.active}>
+            <div app-header ?on=${client.active}
                  @click="${() => this.tabSwitch(i)}">
               <span>Client ${i + 1}</span>
             </div>
-            <div ?hidden=${!active}>
-              <app-main></app-main>
+            <div ?hidden=${!client.active}>
+              ${client.gameCode ? html`
+                <app-main gameCode=${client.gameCode}
+                          playerId=${client.playerId}
+                          playerIndex=${client.playerIndex}
+                          nick=${client.nick}>
+                </app-main>
+              ` : html`
+                <app-main></app-main>
+              `}
             </div>
           </div>
         `)}
@@ -92,13 +102,56 @@ class DebugClient extends LitElement {
     `;
   }
 
+  async queryServer(path, request) {
+    const response = await fetch(path, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(request),
+    });
+    if (!response.ok) {
+      const text = response.text();
+      console.log(text);
+      return;
+    }
+    const json = await response.json();
+    return json;
+  }
+
+  async startGame(playerCount, started) {
+    const response = await fetch('/game/create');
+    const game = await response.json();
+    const gameCode = game.gameCode;
+    for (let i = 0; i < playerCount; ++i) {
+      const nick = `Client ${i + 1}`;
+      const info = await this.queryServer('/game/join', {gameCode, nick});
+      const playerId = info.playerId;
+      this.clients.push({
+        active: true,
+        gameCode,
+        playerId,
+        playerIndex: info.playerIndex,
+        nick,
+      });
+    }
+    for (let i = 0; i < playerCount; ++i) {
+      if (started) {
+        await this.queryServer('/game/ready', {gameCode, playerId: this.clients[i].playerId});
+      }
+    }
+    this.clientCount += playerCount;
+  }
+
   spawnClient() {
-    this.clients.push(true);
+    this.clients.push({
+      active: true,
+    });
     this.clientCount += 1;
   }
 
   tabSwitch(i) {
-    this.clients[i] = !this.clients[i];
+    this.clients[i].active = !this.clients[i].active;
     this.switchVar = !this.switchVar;
   }
 }

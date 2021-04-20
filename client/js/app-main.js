@@ -7,6 +7,7 @@ class AppMain extends LitElement {
       gameCodeError: {type: String},
       nick: {type: String},
       playerId: {type: Number},
+      playerIndex: {type: Number},
       ready: {type: Boolean},
       state: {type: Object},
     }
