@@ -32,6 +32,7 @@ export class Db {
       playerLocation: [],
       cityStates,
       currentWasteType: 0,
+      oceanWasteCount: 0,
     };
   }
 
@@ -214,8 +215,14 @@ export class Db {
         while (city2 === city1) {
           city2 = Math.floor(Math.random() * gameData.cityCount);
         }
-        game.state.cityStates[city1][game.state.currentWasteType] += 2
-        game.state.cityStates[city2][game.state.currentWasteType] += 1
+        const city1Waste = game.state.cityStates[city1].reduce((a: number, b: number) => a + b);
+        const city1Overflow = Math.max(0, city1Waste + 2 - gameData.maxCityWasteCount);
+        game.state.cityStates[city1][game.state.currentWasteType] += 2 - city1Overflow;
+        game.state.oceanWasteCount += city1Overflow;
+        const city2Waste = game.state.cityStates[city2].reduce((a: number, b: number) => a + b);
+        const city2Overflow = Math.max(0, city2Waste + 1 - gameData.maxCityWasteCount);
+        game.state.cityStates[city2][game.state.currentWasteType] += 1 - city2Overflow;
+        game.state.oceanWasteCount += city2Overflow;
         game.state.lastPollutionCard = [city1, city2];
         game.state.currentWasteType = (game.state.currentWasteType + 1) % gameData.wasteCount;
       }

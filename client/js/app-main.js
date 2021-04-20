@@ -172,6 +172,7 @@ class AppMain extends LitElement {
           </button>
         </p>
         ${this.showDetails ? html`
+          <p>Ocean waste count: <b red>${this.state.oceanWasteCount}</b></p>
           <p>
             <span>Cities</span>
             <ul>
