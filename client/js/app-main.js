@@ -17,7 +17,7 @@ class AppMain extends LitElement {
     super();
 
     // Constants.
-    this.updateRateMs = 1000;
+    this.updateRateMs = 500;
     
     // State variables.
     this.gameCode = null;
