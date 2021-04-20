@@ -33,6 +33,7 @@ export class Db {
       cityStates,
       currentWasteType: 0,
       oceanWasteCount: 0,
+      lost: false,
     };
   }
 
@@ -223,6 +224,9 @@ export class Db {
         const city2Overflow = Math.max(0, city2Waste + 1 - gameData.maxCityWasteCount);
         game.state.cityStates[city2][game.state.currentWasteType] += 1 - city2Overflow;
         game.state.oceanWasteCount += city2Overflow;
+        if (game.state.oceanWasteCount >= gameData.maxOceanWasteCount) {
+          game.state.lost = true;
+        }
         game.state.lastPollutionCard = [city1, city2];
         game.state.currentWasteType = (game.state.currentWasteType + 1) % gameData.wasteCount;
       }

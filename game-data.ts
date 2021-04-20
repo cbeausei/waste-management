@@ -36,4 +36,5 @@ export const gameData = {
   actionsPerTurn: 3,
   maxSupportLevel: 4,
   maxCopLevel: 4,
+  maxOceanWasteCount: 4,
 }

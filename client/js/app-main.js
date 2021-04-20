@@ -144,6 +144,9 @@ class AppMain extends LitElement {
       </style>
 
       <div>
+        ${this.state.lost ? html`
+          <h3><b red>GAME OVER</b></h3>
+        ` : html``}
         ${this.state.lastPollutionCard ? html`
           <p>
             <span red>Last pollution card:</span>
@@ -153,7 +156,7 @@ class AppMain extends LitElement {
         ` : html``}
         <p>I'm player <b>${this.nick}</b></p>
         <p>I'm at <b>${this.gameData.cityNames[this.state.playerLocation[this.playerIndex]]}</b></p>
-        ${this.state.playerTurn === this.playerIndex ? html`
+        ${this.state.playerTurn === this.playerIndex && !this.state.lost ? html`
           <p>Your turn (actions left: <b red>${this.state.remainingActions}</b>)</p>
           <p>
             <select id="city-select">
