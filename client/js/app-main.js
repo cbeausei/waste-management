@@ -10,6 +10,7 @@ class AppMain extends LitElement {
       playerIndex: {type: Number},
       ready: {type: Boolean},
       state: {type: Object},
+      showDetails: {type: Boolean},
     }
   }
 
@@ -28,6 +29,7 @@ class AppMain extends LitElement {
     this.state = null;
     this.ready = false;
     this.gameData = null;
+    this.showDetails = false;
     this.fetchGameData().then(gameData => {
       this.gameData = gameData;
     });
@@ -157,6 +159,23 @@ class AppMain extends LitElement {
         ` : html`
           ${this.state.players[this.state.playerTurn]}'s turn
         `}
+        <p>
+          <button @click="${this.toggleDetails}">
+            ${this.showDetails ? html`Hide state` : html`Show state`}
+          </button>
+        </p>
+        ${this.showDetails ? html`
+          <p>
+            <span>Cities</span>
+            <ul>
+              ${this.state.cityStates.map((waste, i) => html`
+                <li>
+                  ${this.gameData.cityNames[i]} (${waste[0]}, ${waste[1]}, ${waste[2]})
+                </li>
+              `)}
+            </ul>
+          </p>
+        ` : html``}
       </div>
     `
   }
@@ -175,6 +194,10 @@ class AppMain extends LitElement {
       return this.renderLobbyPage();
     }
     return this.renderGamePage();
+  }
+
+  toggleDetails() {
+    this.showDetails = !this.showDetails;
   }
 
   async changeCity() {

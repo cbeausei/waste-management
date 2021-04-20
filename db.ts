@@ -19,6 +19,10 @@ export class Db {
   }
 
   getInitialState() {
+    const cityStates = [];
+    for (let i = 0; i < gameData.cityCount; ++i) {
+      cityStates.push([0, 0, 0]);
+    }
     return {
       started: false,
       players: [],
@@ -26,6 +30,7 @@ export class Db {
       playerTurn: 0,
       remainingActions: gameData.actionsPerTurn,
       playerLocation: [],
+      cityStates,
     };
   }
 
