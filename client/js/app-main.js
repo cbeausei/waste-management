@@ -144,6 +144,13 @@ class AppMain extends LitElement {
       </style>
 
       <div>
+        ${this.state.lastPollutionCard ? html`
+          <p>
+            <span red>Last pollution card:</span>
+            <span>${this.gameData.cityNames[this.state.lastPollutionCard[0]]} (2), </span>
+            <span>${this.gameData.cityNames[this.state.lastPollutionCard[1]]} (1)</span>
+          </p>
+        ` : html``}
         <p>I'm player <b>${this.nick}</b></p>
         <p>I'm at <b>${this.gameData.cityNames[this.state.playerLocation[this.playerIndex]]}</b></p>
         ${this.state.playerTurn === this.playerIndex ? html`

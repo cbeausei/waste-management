@@ -31,6 +31,7 @@ export class Db {
       remainingActions: gameData.actionsPerTurn,
       playerLocation: [],
       cityStates,
+      currentWasteType: 0,
     };
   }
 
@@ -208,6 +209,15 @@ export class Db {
       if (game.state.remainingActions <= 0) {
         game.state.playerTurn = (game.state.playerTurn + 1) % game.playerIds.length;
         game.state.remainingActions = gameData.actionsPerTurn;
+        const city1 = Math.floor(Math.random() * gameData.cityCount);
+        let city2 = city1;
+        while (city2 === city1) {
+          city2 = Math.floor(Math.random() * gameData.cityCount);
+        }
+        game.state.cityStates[city1][game.state.currentWasteType] += 2
+        game.state.cityStates[city2][game.state.currentWasteType] += 1
+        game.state.lastPollutionCard = [city1, city2];
+        game.state.currentWasteType = (game.state.currentWasteType + 1) % gameData.wasteCount;
       }
 
       // Save the new state.
