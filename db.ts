@@ -174,6 +174,12 @@ export class Db {
     }
   }
 
+  checkIntInRange(kind: string, val: any, a: number, b: number) {
+    if (isNaN(val) || !Number.isInteger(val) || val < a || val >= b) {
+      throw new Error(`Expected a ${kind} in the range [${a}, ${b}], got '${val}'.`);
+    }
+  }
+
   async play(gameCode: string, playerId: number, move: any) {
     try {
       // Fetch the game, if it exists.
@@ -197,10 +203,19 @@ export class Db {
       }
 
       // Apply the move, if valid.
-      switch (move?.type) {
+      if (!move?.type) {
+        throw new Error('The move must specify a type.');
+      }
+      switch (move.type) {
         case 'move':
-          const newCityId = move?.cityId;
-          game.state.playerLocation[playerIndex] = newCityId;
+          const cityId = Number(move.cityId);
+          this.checkIntInRange('city ID', cityId, 0, gameData.cityCount);
+          game.state.playerLocation[playerIndex] = cityId;
+          break;
+        case 'clean':
+          const wasteType = Number(move.wasteType);
+          this.checkIntInRange('waste type', wasteType, 0, gameData.wasteCount);
+          game.state.cityStates[game.state.playerLocation[playerIndex]][wasteType] = 0;
           break;
         default:
           throw this.unimplementedError();
@@ -209,8 +224,11 @@ export class Db {
       // Update player turn.
       game.state.remainingActions -= 1;
       if (game.state.remainingActions <= 0) {
+        // Change player.
         game.state.playerTurn = (game.state.playerTurn + 1) % game.playerIds.length;
         game.state.remainingActions = gameData.actionsPerTurn;
+        
+        // Draw pollution card.
         const city1 = Math.floor(Math.random() * gameData.cityCount);
         let city2 = city1;
         while (city2 === city1) {
@@ -224,10 +242,14 @@ export class Db {
         const city2Overflow = Math.max(0, city2Waste + 1 - gameData.maxCityWasteCount);
         game.state.cityStates[city2][game.state.currentWasteType] += 1 - city2Overflow;
         game.state.oceanWasteCount += city2Overflow;
+        game.state.lastPollutionCard = [city1, city2];
+        
+        // Checking lose conditions.
         if (game.state.oceanWasteCount >= gameData.maxOceanWasteCount) {
           game.state.lost = true;
         }
-        game.state.lastPollutionCard = [city1, city2];
+
+        // Change waste type.
         game.state.currentWasteType = (game.state.currentWasteType + 1) % gameData.wasteCount;
       }
 

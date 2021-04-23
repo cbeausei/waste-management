@@ -166,6 +166,15 @@ class AppMain extends LitElement {
             </select>
             <button @click="${this.changeCity}">Move to this city</button>
           </p>
+          <p>
+            <select id="waste-select">
+              ${this.gameData.wasteNames.map((wasteType, i) => html`
+                <option value=${i}>${wasteType}</option>
+              `)}
+            </select>
+            <button @click="${this.cleanWaste}">Clean this waste type in ${
+                this.gameData.cityNames[this.state.playerLocation[this.playerIndex]]}</button>
+          </p>
         ` : html`
           ${this.state.players[this.state.playerTurn]}'s turn
         `}
@@ -212,11 +221,21 @@ class AppMain extends LitElement {
   }
 
   async changeCity() {
-    const newCityId = this.shadowRoot.getElementById('city-select').value;
+    const cityId = this.shadowRoot.getElementById('city-select').value;
     await this.queryServer('/game/play', {
       move: {
         type: 'move',
-        cityId: newCityId,
+        cityId,
+      },
+    });
+  }
+
+  async cleanWaste() {
+    const wasteType = this.shadowRoot.getElementById('waste-select').value;
+    await this.queryServer('/game/play', {
+      move: {
+        type: 'clean',
+        wasteType,
       },
     });
   }
