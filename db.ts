@@ -243,6 +243,12 @@ export class Db {
           // Check waste type.
           const wasteType_ = Number(move.wasteType);
           this.checkIntInRange('waste type', wasteType_, 0, gameData.wasteCount);
+          // Check support type.
+          const supportType = Number(move.supportType);
+          this.checkIntInRange('support type', supportType, 0, gameData.supportCount);
+          if (game.state.support[supportType] >= gameData.maxSupportLevel) {
+            throw new Error(`The support type ${gameData.supportNames[supportType]} is already maxed out.`);
+          }
           // Check faisability.
           if (game.state.cityStates[game.state.playerLocation[playerIndex]][wasteType_] === -1) {
             throw new Error(`A solution is already implemented for the '${
@@ -268,6 +274,7 @@ export class Db {
             }
           }
           game.state.playerCards[playerIndex] = newCards;
+          game.state.support[supportType] += 1;
           break;
         default:
           throw this.unimplementedError();
@@ -353,6 +360,5 @@ export class Db {
         throw err;
       }
     }
-    
   }
 }

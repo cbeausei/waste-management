@@ -172,6 +172,9 @@ class AppMain extends LitElement {
       </style>
 
       <div>
+        ${this.state.win ? html`
+          <h3><b green>YOU WON!!</b></h3>
+        ` : html``}
         ${this.state.lost ? html`
           <h3><b red>GAME OVER</b></h3>
         ` : html``}
@@ -203,22 +206,29 @@ class AppMain extends LitElement {
             <button @click="${this.cleanWaste}">Clean this waste in ${
                 this.gameData.cityNames[this.state.playerLocation[this.playerIndex]]}</button>
           </p>
-          <p>
-            ${this.state.playerCards[this.playerIndex].length > 0 ? html`
+          ${this.state.playerCards[this.playerIndex].length > 0 ? html`
+            <p>
+              <select id="support-select">
+                ${this.gameData.supportNames.map((support, i) => html`
+                  <option value=${i}>${support}</option>
+                `)}
+              </select>
               ${this.state.playerCards[this.playerIndex].map((card, i) => html`
                 <div card>
                   <input type="checkbox" id="card-${i}">
                   <waste-display values=${JSON.stringify(card)}></waste-display>
                 </div>
               `)}
+            </p>
+            <p>
               <button @click="${this.implementSolution}">Implement a solution in ${
                   this.gameData.cityNames[this.state.playerLocation[this.playerIndex]]
                   }.
               </button>
-            ` : html `
-              No solution card in hand.
-            `}
-          </p>
+            </p>
+          ` : html `
+            No solution card in hand.
+          `}
         ` : html`
           <p>
             ${this.state.players[this.state.playerTurn]}'s turn
@@ -243,6 +253,12 @@ class AppMain extends LitElement {
         </p>
         ${this.showDetails ? html`
           <p>Ocean waste count: <b red>${this.state.oceanWasteCount}</b></p>
+          <p>
+            <span>Supports</span>
+            ${this.state.support.map(supportVal => html`
+              <span>${supportVal}</span>
+            `)}
+          </p>
           <p>
             <span>Cities</span>
             <div cities>
@@ -315,11 +331,13 @@ class AppMain extends LitElement {
       }
     }
     const wasteType = this.shadowRoot.getElementById('waste-select').value;
+    const supportType = this.shadowRoot.getElementById('support-select').value;
     await this.queryServer('/game/play', {
       move: {
         type: 'solution',
         cardIds,
         wasteType,
+        supportType,
       },
     });
   }
