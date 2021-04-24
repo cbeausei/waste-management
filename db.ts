@@ -144,7 +144,11 @@ export class Db {
       game.state.ready.push(false);
       game.state.players.push(nick);
       game.state.playerLocation.push(gameData.cityStart);
-      game.state.playerCards.push([]);
+      const cards = [];
+      for (let i = 0; i < gameData.initialSolutionCardCount; ++i) {
+        cards.push(this.generateSolutionCard());
+      }
+      game.state.playerCards.push(cards);
       game.state.hasNewCard.push(false);
       await this.collection.updateOne({gameCode}, {$set: game});
       return game.playerIds.length - 1;
@@ -156,6 +160,25 @@ export class Db {
         throw err;
       }
     }
+  }
+
+  generateSolutionCard() {
+    const newCard = [0, 0, 0];
+    let nb = 0;
+    for (let it = 0; it < 5; ++it) {
+      let plusOne = false;
+      if (it === 4 && nb === 0) {
+        plusOne = true;
+      } else if (nb < 3) {
+        plusOne = Math.floor(Math.random() * 2) === 1;
+      }
+      if (plusOne) {
+        const wasteType = Math.floor(Math.random() * gameData.wasteCount);
+        newCard[wasteType] += 1;
+        nb += 1;
+      }
+    }
+    return newCard;
   }
 
   async getGameUpdate(gameCode: string, playerId: number) {
@@ -280,7 +303,7 @@ export class Db {
           throw this.unimplementedError();
       }
 
-      // Check win consition.
+      // Check win condition.
       let win = true;
       for (const supportVal of game.state.support) {
         if (supportVal < gameData.maxSupportLevel) {
@@ -296,21 +319,7 @@ export class Db {
       if (game.state.remainingActions <= 0 && !game.state.win) {
         // Draw solution card.
         if (game.state.playerCards[playerIndex].length < gameData.maxHandCardsCount) {
-          const newCard = [0, 0, 0];
-          let nb = 0;
-          for (let it = 0; it < 5; ++it) {
-            let plusOne = false;
-            if (it === 4 && nb === 0) {
-              plusOne = true;
-            } else if (nb < 3) {
-              plusOne = Math.floor(Math.random() * 2) === 1;
-            }
-            if (plusOne) {
-              const wasteType = Math.floor(Math.random() * gameData.wasteCount);
-              newCard[wasteType] += 1;
-              nb += 1;
-            }
-          }
+          const newCard = this.generateSolutionCard();
           game.state.playerCards[playerIndex].push(newCard);
           game.state.hasNewCard[playerIndex] = true;
         } else {
