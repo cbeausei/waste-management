@@ -1,4 +1,5 @@
 import {LitElement, html} from 'https://unpkg.com/lit-element/lit-element.js?module';
+import './waste-display.js';
 
 class AppMain extends LitElement {
   static get properties() {
@@ -140,7 +141,34 @@ class AppMain extends LitElement {
     return html`
       ${this.baseStyle}
       <style>
-        
+        [cities] {
+          display: flex;
+          flex-direction: column;
+          margin-left: 20px;
+        }
+        [city] {
+          display: flex;
+          width: 240px;
+        }
+        [city] > * {
+          flex: 1;
+        }
+        [card] {
+          align-items: center;
+          display: inline-flex;
+        }
+        [card] > * {
+          margin-left: 7px;
+        }
+        [w0] {
+          background-color: cornflowerblue;
+        }
+        [w1] {
+          background-color: limegreen;
+        }
+        [w2] {
+          background-color: yellow;
+        }
       </style>
 
       <div>
@@ -167,23 +195,25 @@ class AppMain extends LitElement {
             <button @click="${this.changeCity}">Move to this city</button>
           </p>
           <p>
-            <select id="waste-select">
+            <select id="waste-select" w0 @change="${this.selectChange}">
               ${this.gameData.wasteNames.map((wasteType, i) => html`
-                <option value=${i}>${wasteType}</option>
+                <option value=${i} ?w0=${i === 0} ?w1=${i === 1} ?w2=${i === 2}>${wasteType}</option>
               `)}
             </select>
-            <button @click="${this.cleanWaste}">Clean this waste type in ${
+            <button @click="${this.cleanWaste}">Clean this waste in ${
                 this.gameData.cityNames[this.state.playerLocation[this.playerIndex]]}</button>
           </p>
           <p>
             ${this.state.playerCards[this.playerIndex].length > 0 ? html`
               ${this.state.playerCards[this.playerIndex].map((card, i) => html`
-                <input type="checkbox" id="card-${i}">
-                <label for="card-${i}">(${card[0]}, ${card[1]}, ${card[2]})</label>
+                <div card>
+                  <input type="checkbox" id="card-${i}">
+                  <waste-display values=${JSON.stringify(card)}></waste-display>
+                </div>
               `)}
               <button @click="${this.implementSolution}">Implement a solution in ${
                   this.gameData.cityNames[this.state.playerLocation[this.playerIndex]]
-                  } for the selected waste type by combining the selected cards.
+                  }.
               </button>
             ` : html `
               No solution card in hand.
@@ -197,7 +227,9 @@ class AppMain extends LitElement {
             ${this.state.playerCards[this.playerIndex].length > 0 ? html`
               <span>My cards:</span>
               ${this.state.playerCards[this.playerIndex].map((card, i) => html`
-                <span>(${card[0]}, ${card[1]}, ${card[2]})</span>
+                <div card>
+                  <waste-display values=${JSON.stringify(card)}></waste-display>
+                </div>
               `)}
             ` : html `
               No solution card in hand.
@@ -213,13 +245,14 @@ class AppMain extends LitElement {
           <p>Ocean waste count: <b red>${this.state.oceanWasteCount}</b></p>
           <p>
             <span>Cities</span>
-            <ul>
+            <div cities>
               ${this.state.cityStates.map((waste, i) => html`
-                <li>
-                  ${this.gameData.cityNames[i]} (${waste[0]}, ${waste[1]}, ${waste[2]})
-                </li>
+                <div city>
+                  <span>${this.gameData.cityNames[i]}</span>
+                  <waste-display values=${JSON.stringify(waste)}></waste-display>
+                </div>
               `)}
-            </ul>
+            </div>
           </p>
         ` : html``}
       </div>
@@ -244,6 +277,14 @@ class AppMain extends LitElement {
 
   toggleDetails() {
     this.showDetails = !this.showDetails;
+  }
+
+  selectChange(event) {
+    const wasteType = event.target.value;
+    event.target.removeAttribute('w0');
+    event.target.removeAttribute('w1');
+    event.target.removeAttribute('w2');
+    event.target.setAttribute(`w${wasteType}`, '');
   }
 
   async changeCity() {
