@@ -275,7 +275,7 @@ class AppMain extends LitElement {
               ${this.state.cityStates.map((waste, i) => html`
                 <div city>
                   <span>${this.gameData.cityNames[i]}</span>
-                  <waste-display values=${JSON.stringify(waste)}></waste-display>
+                  <waste-display showTotal values=${JSON.stringify(waste)}></waste-display>
                 </div>
               `)}
             </div>

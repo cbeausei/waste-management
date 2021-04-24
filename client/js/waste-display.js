@@ -4,12 +4,14 @@ class WasteDisplay extends LitElement {
   static get properties() {
     return {
       values: {type: Array},
+      showTotal: {type: Boolean},
     }
   }
 
   constructor() {
     super();
     this.values = [];
+    this.showTotal = false;
   }
 
   render() {
@@ -17,12 +19,14 @@ class WasteDisplay extends LitElement {
       <style>
         :host {
           border: solid 1px black;
+          border-right: none;
           display: inline-flex;
           height: 20px;
           width: 60px;
         }
         :host > div {
           align-items: center;
+          border-right: solid 1px black;
           display: flex;
           flex: 1;
           height: 100%;
@@ -50,6 +54,11 @@ class WasteDisplay extends LitElement {
           ${value >= 0 ? html `${value}` : html`<b>SOL</b>`}
         </div>
       `)}
+      ${this.showTotal ? html`
+        <div>
+          ${this.values.reduce((a, b) => a + b)}
+        </div>
+      ` : html``}
     `    
   }
 }
