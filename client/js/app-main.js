@@ -1,4 +1,5 @@
 import {LitElement, html} from 'https://unpkg.com/lit-element/lit-element.js?module';
+import './support-display.js';
 import './waste-display.js';
 
 class AppMain extends LitElement {
@@ -72,6 +73,9 @@ class AppMain extends LitElement {
       }
       [red] {
         color: red;
+      }
+      [green] {
+        color: green;
       }
     </style>
     `;
@@ -169,6 +173,13 @@ class AppMain extends LitElement {
         [w2] {
           background-color: yellow;
         }
+        support-display {
+          display: flex;
+          margin-bottom: 10px;
+          margin-left: 20px;
+          margin-top: 7px;
+          width: 120px;
+        }
       </style>
 
       <div>
@@ -255,9 +266,8 @@ class AppMain extends LitElement {
           <p>Ocean waste count: <b red>${this.state.oceanWasteCount}</b></p>
           <p>
             <span>Supports</span>
-            ${this.state.support.map(supportVal => html`
-              <span>${supportVal}</span>
-            `)}
+            <support-display values=${JSON.stringify(this.state.support)} max=${this.gameData.maxSupportLevel}>
+            </support-display>
           </p>
           <p>
             <span>Cities</span>
