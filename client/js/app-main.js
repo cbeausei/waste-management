@@ -13,6 +13,7 @@ class AppMain extends LitElement {
       ready: {type: Boolean},
       state: {type: Object},
       showDetails: {type: Boolean},
+      selectContent: {type: Object},
     }
   }
 
@@ -32,6 +33,12 @@ class AppMain extends LitElement {
     this.ready = false;
     this.gameData = null;
     this.showDetails = false;
+    this.selectContent = {
+      cityId: 0,
+      wasteType: 0,
+      supportType: 0,
+      cardCount: 0,
+    };
     this.fetchGameData().then(gameData => {
       this.gameData = gameData;
     });
@@ -64,7 +71,7 @@ class AppMain extends LitElement {
         color: blue;
         font-weight: 700;
       }
-      [bold] {
+      [bold] {0
         font-weight: 700;
       }
       [flex-line] {
@@ -180,6 +187,13 @@ class AppMain extends LitElement {
           margin-top: 7px;
           width: 120px;
         }
+        [selection-span] {
+          display: inline-flex;
+          width: 65px;
+        }
+        li {
+          margin-bottom: 4px;
+        }
       </style>
 
       <div>
@@ -196,50 +210,78 @@ class AppMain extends LitElement {
             <span>${this.gameData.cityNames[this.state.lastPollutionCard[1]]} (1)</span>
           </p>
         ` : html``}
-        <p>I'm player <b>${this.nick}</b></p>
-        <p>I'm at <b>${this.gameData.cityNames[this.state.playerLocation[this.playerIndex]]}</b></p>
+        <p>I'm <b>${this.nick}</b> at <b>
+          ${this.gameData.cityNames[this.state.playerLocation[this.playerIndex]]}</b>
+        </p>
         ${this.state.playerTurn === this.playerIndex && !this.state.lost ? html`
-          <p>Your turn (actions left: <b red>${this.state.remainingActions}</b>)</p>
+          <p>My turn (actions left: <b red>${this.state.remainingActions}</b>)</p>
           <p>
-            <select id="city-select">
-              ${this.gameData.cityNames.map((city, i) => html`
-                <option value=${i}>${city}</option>
-              `)}
-            </select>
-            <button @click="${this.changeCity}">Move to this city</button>
-          </p>
+            <span>Selections</span>
+            <ul>
+              <li>
+                <div selection-span>City:</div>
+                <select id="city-select" @change="${this.selectChange}">
+                  ${this.gameData.cityNames.map((city, i) => html`
+                    <option value=${i}>${city}</option>
+                  `)}
+                </select>
+              </li>
+              <li>
+                <div selection-span>Waste:</div>
+                <select id="waste-select" w0 @change="${this.selectChange}">
+                  ${this.gameData.wasteNames.map((wasteType, i) => html`
+                    <option value=${i} ?w0=${i === 0} ?w1=${i === 1} ?w2=${i === 2}>${wasteType}</option>
+                  `)}
+                </select>
+              </li>
+              <li>
+                <div selection-span>Support:</div>
+                <select id="support-select" @change="${this.selectChange}">
+                  ${this.gameData.supportNames.map((support, i) => html`
+                    <option value=${i}>${support}</option>
+                  `)}
+                </select>
+              </li>
+              <li>
+                ${this.state.playerCards[this.playerIndex].length > 0 ? html`
+                  <div selection-span>Cards:</div>
+                  ${this.state.playerCards[this.playerIndex].map((card, i) => html`
+                    <div card>
+                      <input type="checkbox" id="card-${i}" @change="${this.selectChange}">
+                      <waste-display values=${JSON.stringify(card)}></waste-display>
+                    </div>
+                  `)}
+                ` : html `
+                  <span>No solution card in hand</span>
+                `}
+              </li>
+            </ul>
           <p>
-            <select id="waste-select" w0 @change="${this.selectChange}">
-              ${this.gameData.wasteNames.map((wasteType, i) => html`
-                <option value=${i} ?w0=${i === 0} ?w1=${i === 1} ?w2=${i === 2}>${wasteType}</option>
-              `)}
-            </select>
-            <button @click="${this.cleanWaste}">Clean this waste in ${
-                this.gameData.cityNames[this.state.playerLocation[this.playerIndex]]}</button>
+          <p>
+            <span>Actions</span>
+            <ul>
+              <li>
+                <button @click="${this.changeCity}">
+                  Move to ${this.gameData.cityNames[this.selectContent.cityId]}
+                </button>
+              </li>
+              <li>
+                <button @click="${this.cleanWaste}">Clean ${this.gameData.wasteNames[this.selectContent.wasteType]} 
+                    waste in ${this.gameData.cityNames[this.state.playerLocation[this.playerIndex]]}
+                </button>
+              </li>
+              ${this.state.playerCards[this.playerIndex].length > 0 ? html`
+                <li>
+                  <button @click="${this.implementSolution}">
+                    Combine ${this.selectContent.cardCount} card${
+                      this.selectContent.cardCount >= 2 ? html`s` : html``} to implement a solution in ${
+                      this.gameData.cityNames[this.state.playerLocation[this.playerIndex]]} (support: ${
+                      this.gameData.supportNames[this.selectContent.supportType]})
+                  </button>
+                </li>
+              ` : html``}
+            </ul>
           </p>
-          ${this.state.playerCards[this.playerIndex].length > 0 ? html`
-            <p>
-              <select id="support-select">
-                ${this.gameData.supportNames.map((support, i) => html`
-                  <option value=${i}>${support}</option>
-                `)}
-              </select>
-              ${this.state.playerCards[this.playerIndex].map((card, i) => html`
-                <div card>
-                  <input type="checkbox" id="card-${i}">
-                  <waste-display values=${JSON.stringify(card)}></waste-display>
-                </div>
-              `)}
-            </p>
-            <p>
-              <button @click="${this.implementSolution}">Implement a solution in ${
-                  this.gameData.cityNames[this.state.playerLocation[this.playerIndex]]
-                  }.
-              </button>
-            </p>
-          ` : html `
-            No solution card in hand.
-          `}
         ` : html`
           <p>
             ${this.state.players[this.state.playerTurn]}'s turn
@@ -306,11 +348,26 @@ class AppMain extends LitElement {
   }
 
   selectChange(event) {
-    const wasteType = event.target.value;
-    event.target.removeAttribute('w0');
-    event.target.removeAttribute('w1');
-    event.target.removeAttribute('w2');
-    event.target.setAttribute(`w${wasteType}`, '');
+    const cityId = this.shadowRoot.getElementById('city-select').value;
+    const supportType = this.shadowRoot.getElementById('support-select').value;
+    const wasteSelect = this.shadowRoot.getElementById('waste-select');
+    const wasteType = wasteSelect.value;
+    wasteSelect.removeAttribute('w0');
+    wasteSelect.removeAttribute('w1');
+    wasteSelect.removeAttribute('w2');
+    wasteSelect.setAttribute(`w${wasteType}`, '');
+    let cardCount = 0;
+    for (let i = 0; i < this.state.playerCards[this.playerIndex].length; ++i) {
+      if (this.shadowRoot.getElementById(`card-${i}`).checked) {
+        cardCount += 1;
+      }
+    }
+    this.selectContent = {
+      cityId,
+      wasteType,
+      supportType,
+      cardCount,
+    };
   }
 
   async changeCity() {
