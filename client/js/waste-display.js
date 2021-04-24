@@ -37,10 +37,16 @@ class WasteDisplay extends LitElement {
         [w2] {
           background-color: yellow;
         }
+        [op] {
+          opacity: 0.5;
+        }
+        [empty] {
+          background-color: orangered;
+        }
       </style>
 
       ${this.values.map((value, i) => html`
-        <div ?w0=${i === 0} ?w1=${i === 1} ?w2=${i === 2}>
+        <div ?w0=${i === 0} ?w1=${i === 1} ?w2=${i === 2} ?op=${value === 0} ?empty=${value === -1}>
           ${value >= 0 ? html `${value}` : html`<b>SOL</b>`}
         </div>
       `)}
