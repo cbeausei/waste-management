@@ -23,6 +23,10 @@ export class Db {
     for (let i = 0; i < gameData.cityCount; ++i) {
       cityStates.push([0, 0, 0]);
     }
+    const support = [];
+    for (let i = 0; i < gameData.supportCount; ++i) {
+      support.push(0);
+    }
     return {
       started: false,
       players: [],
@@ -34,8 +38,10 @@ export class Db {
       currentWasteType: 0,
       oceanWasteCount: 0,
       lost: false,
+      win: false,
       playerCards: [],
       hasNewCard: [],
+      support,
     };
   }
 
@@ -267,9 +273,20 @@ export class Db {
           throw this.unimplementedError();
       }
 
+      // Check win consition.
+      let win = true;
+      for (const supportVal of game.state.support) {
+        if (supportVal < gameData.maxSupportLevel) {
+          win = false;
+        }
+      }
+      if (win) {
+        game.state.win = true;
+      }
+
       // Update player turn.
       game.state.remainingActions -= 1;
-      if (game.state.remainingActions <= 0) {
+      if (game.state.remainingActions <= 0 && !game.state.win) {
         // Draw solution card.
         if (game.state.playerCards[playerIndex].length < gameData.maxHandCardsCount) {
           const newCard = [0, 0, 0];
@@ -278,7 +295,7 @@ export class Db {
             let plusOne = false;
             if (it === 4 && nb === 0) {
               plusOne = true;
-            } else {
+            } else if (nb < 3) {
               plusOne = Math.floor(Math.random() * 2) === 1;
             }
             if (plusOne) {
