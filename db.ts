@@ -34,6 +34,8 @@ export class Db {
       currentWasteType: 0,
       oceanWasteCount: 0,
       lost: false,
+      playerCards: [],
+      hasNewCard: [],
     };
   }
 
@@ -136,6 +138,8 @@ export class Db {
       game.state.ready.push(false);
       game.state.players.push(nick);
       game.state.playerLocation.push(gameData.cityStart);
+      game.state.playerCards.push([]);
+      game.state.hasNewCard.push(false);
       await this.collection.updateOne({gameCode}, {$set: game});
       return game.playerIds.length - 1;
     } catch (err) {
@@ -176,7 +180,7 @@ export class Db {
 
   checkIntInRange(kind: string, val: any, a: number, b: number) {
     if (isNaN(val) || !Number.isInteger(val) || val < a || val >= b) {
-      throw new Error(`Expected a ${kind} in the range [${a}, ${b}], got '${val}'.`);
+      throw new Error(`Expected a ${kind} in the range [${a}, ${b - 1}], got '${val}'.`);
     }
   }
 
@@ -217,6 +221,48 @@ export class Db {
           this.checkIntInRange('waste type', wasteType, 0, gameData.wasteCount);
           game.state.cityStates[game.state.playerLocation[playerIndex]][wasteType] = 0;
           break;
+        case 'solution':
+          // Check card IDs.
+          const cardIds: number[] = [];
+          const cardSeen = new Set();
+          for (const cardId of move.cardIds) {
+            const intCardId = Number(cardId);
+            if (cardSeen.has(intCardId)) {
+              throw new Error(`The card with ID ${intCardId} is selected multiple times.`);
+            }
+            cardSeen.add(intCardId);
+            this.checkIntInRange('card ID', intCardId, 0, game.state.playerCards[playerIndex].length);
+            cardIds.push(intCardId);
+          }
+          // Check waste type.
+          const wasteType_ = Number(move.wasteType);
+          this.checkIntInRange('waste type', wasteType_, 0, gameData.wasteCount);
+          // Check faisability.
+          if (game.state.cityStates[game.state.playerLocation[playerIndex]][wasteType_] === -1) {
+            throw new Error(`A solution is already implemented for the '${
+              gameData.wasteNames[wasteType_]}' waste in ${gameData.cityNames[
+                game.state.playerLocation[playerIndex]]}.`);
+          }
+          let solWaste = 0;
+          for (const cardId of cardIds) {
+            solWaste += game.state.playerCards[playerIndex][cardId][wasteType_];
+          }
+          const cityWaste = game.state.cityStates[game.state.playerLocation[playerIndex]][wasteType_];
+          if (solWaste < cityWaste) {
+            throw new Error(`The selected combination of cards can't implement a solution for the '${
+              gameData.wasteNames[wasteType_]}' waste in ${gameData.cityNames[
+                game.state.playerLocation[playerIndex]]}.`);
+          }
+          // Apply solution.
+          game.state.cityStates[game.state.playerLocation[playerIndex]][wasteType_] = -1;
+          const newCards = [];
+          for (let cardId = 0; cardId < game.state.playerCards[playerIndex].length; ++cardId) {
+            if (!cardSeen.has(cardId)) {
+              newCards.push([...game.state.playerCards[playerIndex][cardId]]);
+            }
+          }
+          game.state.playerCards[playerIndex] = newCards;
+          break;
         default:
           throw this.unimplementedError();
       }
@@ -224,6 +270,29 @@ export class Db {
       // Update player turn.
       game.state.remainingActions -= 1;
       if (game.state.remainingActions <= 0) {
+        // Draw solution card.
+        if (game.state.playerCards[playerIndex].length < gameData.maxHandCardsCount) {
+          const newCard = [0, 0, 0];
+          let nb = 0;
+          for (let it = 0; it < 5; ++it) {
+            let plusOne = false;
+            if (it === 4 && nb === 0) {
+              plusOne = true;
+            } else {
+              plusOne = Math.floor(Math.random() * 2) === 1;
+            }
+            if (plusOne) {
+              const wasteType = Math.floor(Math.random() * gameData.wasteCount);
+              newCard[wasteType] += 1;
+              nb += 1;
+            }
+          }
+          game.state.playerCards[playerIndex].push(newCard);
+          game.state.hasNewCard[playerIndex] = true;
+        } else {
+          game.state.hasNewCard[playerIndex] = false;
+        }
+
         // Change player.
         game.state.playerTurn = (game.state.playerTurn + 1) % game.playerIds.length;
         game.state.remainingActions = gameData.actionsPerTurn;
@@ -234,14 +303,18 @@ export class Db {
         while (city2 === city1) {
           city2 = Math.floor(Math.random() * gameData.cityCount);
         }
-        const city1Waste = game.state.cityStates[city1].reduce((a: number, b: number) => a + b);
-        const city1Overflow = Math.max(0, city1Waste + 2 - gameData.maxCityWasteCount);
-        game.state.cityStates[city1][game.state.currentWasteType] += 2 - city1Overflow;
-        game.state.oceanWasteCount += city1Overflow;
-        const city2Waste = game.state.cityStates[city2].reduce((a: number, b: number) => a + b);
-        const city2Overflow = Math.max(0, city2Waste + 1 - gameData.maxCityWasteCount);
-        game.state.cityStates[city2][game.state.currentWasteType] += 1 - city2Overflow;
-        game.state.oceanWasteCount += city2Overflow;
+        if (game.state.cityStates[city1][game.state.currentWasteType] !== -1) {
+          const city1Waste = game.state.cityStates[city1].reduce((a: number, b: number) => a + b);
+          const city1Overflow = Math.max(0, city1Waste + 2 - gameData.maxCityWasteCount);
+          game.state.cityStates[city1][game.state.currentWasteType] += 2 - city1Overflow;
+          game.state.oceanWasteCount += city1Overflow;
+        }
+        if (game.state.cityStates[city2][game.state.currentWasteType] !== -1) {
+          const city2Waste = game.state.cityStates[city2].reduce((a: number, b: number) => a + b);
+          const city2Overflow = Math.max(0, city2Waste + 1 - gameData.maxCityWasteCount);
+          game.state.cityStates[city2][game.state.currentWasteType] += 1 - city2Overflow;
+          game.state.oceanWasteCount += city2Overflow;
+        }  
         game.state.lastPollutionCard = [city1, city2];
         
         // Checking lose conditions.

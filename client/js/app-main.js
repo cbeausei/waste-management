@@ -175,8 +175,34 @@ class AppMain extends LitElement {
             <button @click="${this.cleanWaste}">Clean this waste type in ${
                 this.gameData.cityNames[this.state.playerLocation[this.playerIndex]]}</button>
           </p>
+          <p>
+            ${this.state.playerCards[this.playerIndex].length > 0 ? html`
+              ${this.state.playerCards[this.playerIndex].map((card, i) => html`
+                <input type="checkbox" id="card-${i}">
+                <label for="card-${i}">(${card[0]}, ${card[1]}, ${card[2]})</label>
+              `)}
+              <button @click="${this.implementSolution}">Implement a solution in ${
+                  this.gameData.cityNames[this.state.playerLocation[this.playerIndex]]
+                  } for the selected waste type by combining the selected cards.
+              </button>
+            ` : html `
+              No solution card in hand.
+            `}
+          </p>
         ` : html`
-          ${this.state.players[this.state.playerTurn]}'s turn
+          <p>
+            ${this.state.players[this.state.playerTurn]}'s turn
+          </p>
+          <p>
+            ${this.state.playerCards[this.playerIndex].length > 0 ? html`
+              <span>My cards:</span>
+              ${this.state.playerCards[this.playerIndex].map((card, i) => html`
+                <span>(${card[0]}, ${card[1]}, ${card[2]})</span>
+              `)}
+            ` : html `
+              No solution card in hand.
+            `}
+          </p>
         `}
         <p>
           <button @click="${this.toggleDetails}">
@@ -235,6 +261,23 @@ class AppMain extends LitElement {
     await this.queryServer('/game/play', {
       move: {
         type: 'clean',
+        wasteType,
+      },
+    });
+  }
+
+  async implementSolution() {
+    const cardIds = [];
+    for (let i = 0; i < this.state.playerCards[this.playerIndex].length; ++i) {
+      if (this.shadowRoot.getElementById(`card-${i}`).checked) {
+        cardIds.push(i);
+      }
+    }
+    const wasteType = this.shadowRoot.getElementById('waste-select').value;
+    await this.queryServer('/game/play', {
+      move: {
+        type: 'solution',
+        cardIds,
         wasteType,
       },
     });
