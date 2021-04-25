@@ -202,6 +202,14 @@ class AppMain extends LitElement {
         button[op] {
           opacity: 0.4;
         }
+        [state] {
+          background-color: rgba(0, 0, 0, 0.2);
+          border: solid 1px black;
+          border-radius: 20px;
+          margin: 10px auto;
+          padding: 10px 20px;
+          width: calc(100% - 20px);
+        }
       </style>
 
       <div>
@@ -334,42 +342,44 @@ class AppMain extends LitElement {
           </button>
         </p>
         ${this.showDetails ? html`
-          <p>Ocean waste count: <b red>${this.state.oceanWasteCount}</b></p>
-          <p>
-            <span>Supports</span>
-            <support-display values=${JSON.stringify(this.state.support)} max=${this.gameData.maxSupportLevel}>
-            </support-display>
-          </p>
-          <p>
-            <span>Players</span>
-            <ul>
-              ${this.state.players.map((nick, i) => html`
-                ${this.playerIndex !== i ? html`
-                  <li>
-                    <span><b>${nick}</b> is in <b>${
-                        this.gameData.cityNames[this.state.playerLocation[i]]}</b>
-                    </span>
-                    ${this.state.playerCards[i].map(card => html`
-                      <div card>
-                        <waste-display values=${JSON.stringify(card)}></waste-display>
-                      </div>
-                    `)}
-                  </li>
-                ` : html``}
-              `)}
-            </ul>
-          </p>
-          <p>
-            <span>Cities</span>
-            <div cities>
-              ${this.state.cityStates.map((waste, i) => html`
-                <div city>
-                  <span>${this.gameData.cityNames[i]}</span>
-                  <waste-display showTotal values=${JSON.stringify(waste)}></waste-display>
-                </div>
-              `)}
-            </div>
-          </p>
+          <div state>
+            <p>Ocean waste count: <b red>${this.state.oceanWasteCount}</b></p>
+            <p>
+              <span>Supports</span>
+              <support-display values=${JSON.stringify(this.state.support)} max=${this.gameData.maxSupportLevel}>
+              </support-display>
+            </p>
+            <p>
+              <span>Players</span>
+              <ul>
+                ${this.state.players.map((nick, i) => html`
+                  ${this.playerIndex !== i ? html`
+                    <li>
+                      <span><b>${nick}</b> is in <b>${
+                          this.gameData.cityNames[this.state.playerLocation[i]]}</b>
+                      </span>
+                      ${this.state.playerCards[i].map(card => html`
+                        <div card>
+                          <waste-display values=${JSON.stringify(card)}></waste-display>
+                        </div>
+                      `)}
+                    </li>
+                  ` : html``}
+                `)}
+              </ul>
+            </p>
+            <p>
+              <span>Cities</span>
+              <div cities>
+                ${this.state.cityStates.map((waste, i) => html`
+                  <div city>
+                    <span>${this.gameData.cityNames[i]}</span>
+                    <waste-display showTotal values=${JSON.stringify(waste)}></waste-display>
+                  </div>
+                `)}
+              </div>
+            </p>
+          </div>
         ` : html``}
       </div>
     `
