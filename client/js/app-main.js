@@ -293,7 +293,8 @@ class AppMain extends LitElement {
                   <button @click="${this.implementSolution}">
                     Combine <b>${this.selectContent.cardIds.length}</b> card${
                       this.selectContent.cardIds.length >= 2 ? html`s` : html``} to implement a solution in <b>${
-                      this.gameData.cityNames[this.state.playerLocation[this.playerIndex]]}</b> (support: <b>${
+                      this.gameData.cityNames[this.state.playerLocation[this.playerIndex]]}</b> for the <b>
+                      ${this.gameData.wasteNames[this.selectContent.wasteType]}</b> waste (support: <b>${
                       this.gameData.supportNames[this.selectContent.supportType]}</b>)
                   </button>
                 </li>

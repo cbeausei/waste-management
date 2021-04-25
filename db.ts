@@ -253,6 +253,16 @@ export class Db {
         case 'clean':
           const wasteType = Number(action.wasteType);
           this.checkIntInRange('waste type', wasteType, 0, gameData.wasteCount);
+          if (game.state.cityStates[game.state.playerLocation[playerIndex]][wasteType] === 0) {
+            throw new Error(`Can't clean: there are no '${
+              gameData.wasteNames[wasteType]}' waste in ${gameData.cityNames[
+                game.state.playerLocation[playerIndex]]}.`);
+          }
+          if (game.state.cityStates[game.state.playerLocation[playerIndex]][wasteType] === -1) {
+            throw new Error(`Can't clean: a solution is already implemented for the '${
+              gameData.wasteNames[wasteType]}' waste in ${gameData.cityNames[
+                game.state.playerLocation[playerIndex]]}.`);
+          }
           game.state.cityStates[game.state.playerLocation[playerIndex]][wasteType] = 0;
           break;
         case 'solution':
