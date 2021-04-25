@@ -39,7 +39,7 @@ class AppMain extends LitElement {
       cityId: 0,
       wasteType: 0,
       supportType: 0,
-      cardCount: 0,
+      cardIds: [],
     };
     this.fetchGameData().then(gameData => {
       this.gameData = gameData;
@@ -213,7 +213,7 @@ class AppMain extends LitElement {
           </p>
         ` : html``}
         <p>I'm <b>${this.nick}</b> at <b>
-          ${this.gameData.cityNames[this.state.playerLocation[this.playerIndex]]}</b>
+          ${this.gameData.cityNames[this.state.playerLocation[this.playerIndex]]}</b>.
         </p>
         ${this.state.playerTurn === this.playerIndex && !this.state.lost ? html`
           <p>My turn (actions left: <b red>${this.state.remainingActions}</b>)</p>
@@ -224,15 +224,23 @@ class AppMain extends LitElement {
                 <div selection-span>City:</div>
                 <select id="city-select" @change="${this.selectChange}">
                   ${this.gameData.cityNames.map((city, i) => html`
-                    <option value=${i}>${city}</option>
+                    <option value=${i} ?selected=${this.selectContent.cityId === i}>
+                      ${city}
+                    </option>
                   `)}
                 </select>
               </li>
               <li>
                 <div selection-span>Waste:</div>
-                <select id="waste-select" w0 @change="${this.selectChange}">
+                <select id="waste-select" w0 @change="${this.selectChange}"
+                    ?w0=${this.selectContent.wasteType === 0}
+                    ?w1=${this.selectContent.wasteType === 1}
+                    ?w2=${this.selectContent.wasteType === 2}>
                   ${this.gameData.wasteNames.map((wasteType, i) => html`
-                    <option value=${i} ?w0=${i === 0} ?w1=${i === 1} ?w2=${i === 2}>${wasteType}</option>
+                    <option value=${i} ?selected=${this.selectContent.wasteType === i}
+                            ?w0=${i === 0} ?w1=${i === 1} ?w2=${i === 2}>
+                      ${wasteType}
+                    </option>
                   `)}
                 </select>
               </li>
@@ -240,7 +248,9 @@ class AppMain extends LitElement {
                 <div selection-span>Support:</div>
                 <select id="support-select" @change="${this.selectChange}">
                   ${this.gameData.supportNames.map((support, i) => html`
-                    <option value=${i}>${support}</option>
+                    <option value=${i} ?selected=${this.selectContent.supportType === i}>
+                      ${support}
+                    </option>
                   `)}
                 </select>
               </li>
@@ -249,7 +259,8 @@ class AppMain extends LitElement {
                   <div selection-span>Cards:</div>
                   ${this.state.playerCards[this.playerIndex].map((card, i) => html`
                     <div card>
-                      <input type="checkbox" id="card-${i}" @change="${this.selectChange}">
+                      <input type="checkbox" id="card-${i}" @change="${this.selectChange}"
+                             ?checked=${this.selectContent.cardIds.includes(i)}>
                       <waste-display values=${JSON.stringify(card)}></waste-display>
                     </div>
                   `)}
@@ -279,8 +290,8 @@ class AppMain extends LitElement {
               ${this.state.playerCards[this.playerIndex].length > 0 ? html`
                 <li>
                   <button @click="${this.implementSolution}">
-                    Combine ${this.selectContent.cardCount} card${
-                      this.selectContent.cardCount >= 2 ? html`s` : html``} to implement a solution in ${
+                    Combine ${this.selectContent.cardIds.length} card${
+                      this.selectContent.cardIds.length >= 2 ? html`s` : html``} to implement a solution in ${
                       this.gameData.cityNames[this.state.playerLocation[this.playerIndex]]} (support: ${
                       this.gameData.supportNames[this.selectContent.supportType]})
                   </button>
@@ -357,25 +368,25 @@ class AppMain extends LitElement {
   }
 
   selectChange(event) {
-    const cityId = this.shadowRoot.getElementById('city-select').value;
-    const supportType = this.shadowRoot.getElementById('support-select').value;
+    const cityId = Number(this.shadowRoot.getElementById('city-select').value);
+    const supportType = Number(this.shadowRoot.getElementById('support-select').value);
     const wasteSelect = this.shadowRoot.getElementById('waste-select');
-    const wasteType = wasteSelect.value;
+    const wasteType = Number(wasteSelect.value);
     wasteSelect.removeAttribute('w0');
     wasteSelect.removeAttribute('w1');
     wasteSelect.removeAttribute('w2');
     wasteSelect.setAttribute(`w${wasteType}`, '');
-    let cardCount = 0;
+    const cardIds = [];
     for (let i = 0; i < this.state.playerCards[this.playerIndex].length; ++i) {
       if (this.shadowRoot.getElementById(`card-${i}`).checked) {
-        cardCount += 1;
+        cardIds.push(i);
       }
     }
     this.selectContent = {
       cityId,
       wasteType,
       supportType,
-      cardCount,
+      cardIds,
     };
   }
 
@@ -395,35 +406,25 @@ class AppMain extends LitElement {
   }
 
   changeCity() {
-    const cityId = this.shadowRoot.getElementById('city-select').value;
     this.sendAction({
-      type: 'pass',
-      cityId,
+      type: 'move',
+      cityId: this.selectContent.cityId,
     });
   }
 
   cleanWaste() {
-    const wasteType = this.shadowRoot.getElementById('waste-select').value;
     this.sendAction({
-      type: 'pass',
-      wasteType,
+      type: 'clean',
+      wasteType: this.selectContent.wasteType,
     });
   }
 
   implementSolution() {
-    const cardIds = [];
-    for (let i = 0; i < this.state.playerCards[this.playerIndex].length; ++i) {
-      if (this.shadowRoot.getElementById(`card-${i}`).checked) {
-        cardIds.push(i);
-      }
-    }
-    const wasteType = this.shadowRoot.getElementById('waste-select').value;
-    const supportType = this.shadowRoot.getElementById('support-select').value;
     this.sendAction({
-      type: 'pass',
-      cardIds,
-      wasteType,
-      supportType,
+      type: 'solution',
+      cardIds: this.selectContent.cardIds,
+      wasteType: this.selectContent.wasteType,
+      supportType: this.selectContent.supportType,
     });
   }
 
