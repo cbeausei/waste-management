@@ -342,13 +342,15 @@ export class Db {
           city2 = Math.floor(Math.random() * gameData.cityCount);
         }
         if (game.state.cityStates[city1][game.state.currentWasteType] !== -1) {
-          const city1Waste = game.state.cityStates[city1].reduce((a: number, b: number) => a + b);
+          const city1Waste = game.state.cityStates[city1].reduce(
+            (a: number, b: number) => Math.max(0, a) + Math.max(0, b));
           const city1Overflow = Math.max(0, city1Waste + 2 - gameData.maxCityWasteCount);
           game.state.cityStates[city1][game.state.currentWasteType] += 2 - city1Overflow;
           game.state.oceanWasteCount += city1Overflow;
         }
         if (game.state.cityStates[city2][game.state.currentWasteType] !== -1) {
-          const city2Waste = game.state.cityStates[city2].reduce((a: number, b: number) => a + b);
+          const city2Waste = game.state.cityStates[city2].reduce(
+            (a: number, b: number) => Math.max(0, a) + Math.max(0, b));
           const city2Overflow = Math.max(0, city2Waste + 1 - gameData.maxCityWasteCount);
           game.state.cityStates[city2][game.state.currentWasteType] += 1 - city2Overflow;
           game.state.oceanWasteCount += city2Overflow;

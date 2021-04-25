@@ -56,7 +56,7 @@ class WasteDisplay extends LitElement {
       `)}
       ${this.showTotal ? html`
         <div>
-          ${this.values.reduce((a, b) => b + Math.max(0, a))}
+          ${this.values.reduce((a, b) => Math.max(0, a) + Math.max(0, b))}
         </div>
       ` : html``}
     `    
