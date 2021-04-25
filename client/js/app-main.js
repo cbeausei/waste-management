@@ -159,7 +159,7 @@ class AppMain extends LitElement {
         }
         [city] {
           display: flex;
-          width: 240px;
+          width: 320px;
         }
         [city] > * {
           flex: 1;
