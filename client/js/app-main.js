@@ -163,8 +163,11 @@ class AppMain extends LitElement {
           display: flex;
           width: 320px;
         }
-        [city] > * {
+        [city] > span {
           flex: 1;
+        }
+        [city] > waste-display {
+          flex: 2;
         }
         [card] {
           align-items: center;
@@ -336,6 +339,25 @@ class AppMain extends LitElement {
             <span>Supports</span>
             <support-display values=${JSON.stringify(this.state.support)} max=${this.gameData.maxSupportLevel}>
             </support-display>
+          </p>
+          <p>
+            <span>Players</span>
+            <ul>
+              ${this.state.players.map((nick, i) => html`
+                ${this.playerIndex !== i ? html`
+                  <li>
+                    <span><b>${nick}</b> is in <b>${
+                        this.gameData.cityNames[this.state.playerLocation[i]]}</b>
+                    </span>
+                    ${this.state.playerCards[i].map(card => html`
+                      <div card>
+                        <waste-display values=${JSON.stringify(card)}></waste-display>
+                      </div>
+                    `)}
+                  </li>
+                ` : html``}
+              `)}
+            </ul>
           </p>
           <p>
             <span>Cities</span>
