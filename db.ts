@@ -245,6 +245,9 @@ export class Db {
         case 'move':
           const cityId = Number(action.cityId);
           this.checkIntInRange('city ID', cityId, 0, gameData.cityCount);
+          if (cityId === game.state.playerLocation[playerIndex]) {
+            throw new Error(`You are already in ${gameData.cityNames[cityId]}.`);
+          }
           game.state.playerLocation[playerIndex] = cityId;
           break;
         case 'clean':
