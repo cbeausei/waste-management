@@ -279,21 +279,22 @@ class AppMain extends LitElement {
                 </button>
               <li>
                 <button @click="${this.changeCity}">
-                  Move to ${this.gameData.cityNames[this.selectContent.cityId]}
+                  Move to <b>${this.gameData.cityNames[this.selectContent.cityId]}</b>
                 </button>
               </li>
               <li>
-                <button @click="${this.cleanWaste}">Clean ${this.gameData.wasteNames[this.selectContent.wasteType]} 
-                    waste in ${this.gameData.cityNames[this.state.playerLocation[this.playerIndex]]}
+                <button @click="${this.cleanWaste}">Clean <b>${
+                    this.gameData.wasteNames[this.selectContent.wasteType]}</b>
+                    waste in <b>${this.gameData.cityNames[this.state.playerLocation[this.playerIndex]]}</b>
                 </button>
               </li>
               ${this.state.playerCards[this.playerIndex].length > 0 ? html`
                 <li>
                   <button @click="${this.implementSolution}">
-                    Combine ${this.selectContent.cardIds.length} card${
-                      this.selectContent.cardIds.length >= 2 ? html`s` : html``} to implement a solution in ${
-                      this.gameData.cityNames[this.state.playerLocation[this.playerIndex]]} (support: ${
-                      this.gameData.supportNames[this.selectContent.supportType]})
+                    Combine <b>${this.selectContent.cardIds.length}</b> card${
+                      this.selectContent.cardIds.length >= 2 ? html`s` : html``} to implement a solution in <b>${
+                      this.gameData.cityNames[this.state.playerLocation[this.playerIndex]]}</b> (support: <b>${
+                      this.gameData.supportNames[this.selectContent.supportType]}</b>)
                   </button>
                 </li>
               ` : html``}
