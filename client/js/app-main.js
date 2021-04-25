@@ -203,7 +203,7 @@ class AppMain extends LitElement {
           opacity: 0.4;
         }
         [box-visual] {
-          background-color: rgba(0, 0, 0, 0.2);
+          background-color: rgba(0, 0, 0, 0.15);
           border: solid 1px black;
           border-radius: 20px;
           margin: 10px auto;
@@ -229,8 +229,8 @@ class AppMain extends LitElement {
         <p>I'm <b>${this.nick}</b> at <b>
           ${this.gameData.cityNames[this.state.playerLocation[this.playerIndex]]}</b>.
         </p>
-        ${this.state.playerTurn === this.playerIndex && !this.state.lost ? html`
-          <p>My turn (actions left: <b red>${this.state.remainingActions}</b>)</p>
+        ${this.state.playerTurn === this.playerIndex && !this.state.lost && !this.state.win ? html`
+          <p>My turn</p>
           <div box-visual>
             <span>Selections</span>
             <ul>
@@ -285,7 +285,7 @@ class AppMain extends LitElement {
             </ul>
           </div>
           <div box-visual>
-            <span>Actions</span>
+            <span>Actions (<b red>${this.state.remainingActions}</b> left)</span>
             <ul>
               <li>
                 <button @click="${this.passTurn}">
