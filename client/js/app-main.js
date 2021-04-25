@@ -7,6 +7,7 @@ class AppMain extends LitElement {
     return {
       gameCode: {type: String},
       gameCodeError: {type: String},
+      actionError: {type: String},
       nick: {type: String},
       playerId: {type: Number},
       playerIndex: {type: Number},
@@ -26,6 +27,7 @@ class AppMain extends LitElement {
     // State variables.
     this.gameCode = null;
     this.gameCodeError = null;
+    this.actionError = null;
     this.playerId = null;
     this.playerIndex = null;
     this.nick = null;
@@ -281,6 +283,9 @@ class AppMain extends LitElement {
                 </li>
               ` : html``}
             </ul>
+            ${this.actionError != null ? html`
+              <span red>${this.actionError}</span>
+            ` : html``}
           </p>
         ` : html`
           <p>
@@ -372,22 +377,32 @@ class AppMain extends LitElement {
 
   async changeCity() {
     const cityId = this.shadowRoot.getElementById('city-select').value;
-    await this.queryServer('/game/play', {
-      move: {
-        type: 'move',
-        cityId,
-      },
-    });
+    try {
+      await this.queryServer('/game/play', {
+        move: {
+          type: 'move',
+          cityId,
+        },
+      });
+      this.actionError = null;
+    } catch (err) {
+      this.actionError = err.message;
+    }
   }
 
   async cleanWaste() {
     const wasteType = this.shadowRoot.getElementById('waste-select').value;
-    await this.queryServer('/game/play', {
-      move: {
-        type: 'clean',
-        wasteType,
-      },
-    });
+    try {
+      await this.queryServer('/game/play', {
+        move: {
+          type: 'clean',
+          wasteType,
+        },
+      });
+      this.actionError = null;
+    } catch (err) {
+      this.actionError = err.message;
+    }
   }
 
   async implementSolution() {
@@ -399,14 +414,19 @@ class AppMain extends LitElement {
     }
     const wasteType = this.shadowRoot.getElementById('waste-select').value;
     const supportType = this.shadowRoot.getElementById('support-select').value;
-    await this.queryServer('/game/play', {
-      move: {
-        type: 'solution',
-        cardIds,
-        wasteType,
-        supportType,
-      },
-    });
+    try {
+      await this.queryServer('/game/play', {
+        move: {
+          type: 'solution',
+          cardIds,
+          wasteType,
+          supportType,
+        },
+      });
+      this.actionError = null;
+    } catch (err) {
+      this.actionError = err.message;
+    }
   }
 
   async copyGameCode() {
