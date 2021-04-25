@@ -202,7 +202,7 @@ class AppMain extends LitElement {
         button[op] {
           opacity: 0.4;
         }
-        [state] {
+        [box-visual] {
           background-color: rgba(0, 0, 0, 0.2);
           border: solid 1px black;
           border-radius: 20px;
@@ -231,7 +231,7 @@ class AppMain extends LitElement {
         </p>
         ${this.state.playerTurn === this.playerIndex && !this.state.lost ? html`
           <p>My turn (actions left: <b red>${this.state.remainingActions}</b>)</p>
-          <p>
+          <div box-visual>
             <span>Selections</span>
             <ul>
               <li>
@@ -283,8 +283,8 @@ class AppMain extends LitElement {
                 `}
               </li>
             </ul>
-          <p>
-          <p>
+          </div>
+          <div box-visual>
             <span>Actions</span>
             <ul>
               <li>
@@ -318,7 +318,7 @@ class AppMain extends LitElement {
             ${this.actionError != null ? html`
               <span red>${this.actionError}</span>
             ` : html``}
-          </p>
+          </div>
         ` : html`
           <p>
             ${this.state.players[this.state.playerTurn]}'s turn
@@ -342,7 +342,7 @@ class AppMain extends LitElement {
           </button>
         </p>
         ${this.showDetails ? html`
-          <div state>
+          <div box-visual>
             <p>Ocean waste count: <b red>${this.state.oceanWasteCount}</b></p>
             <p>
               <span>Supports</span>
