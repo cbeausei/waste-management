@@ -263,6 +263,10 @@ class AppMain extends LitElement {
             <span>Actions</span>
             <ul>
               <li>
+                <button @click="${this.passTurn}">
+                  Pass
+                </button>
+              <li>
                 <button @click="${this.changeCity}">
                   Move to ${this.gameData.cityNames[this.selectContent.cityId]}
                 </button>
@@ -375,37 +379,38 @@ class AppMain extends LitElement {
     };
   }
 
-  async changeCity() {
+  async sendAction(action) {
+    try {
+      await this.queryServer('/game/play', {action});
+      this.actionError = null;
+    } catch (err) {
+      this.actionError = err.message;
+    }
+  }
+
+  passTurn() {
+    this.sendAction({
+      type: 'pass',
+    });
+  }
+
+  changeCity() {
     const cityId = this.shadowRoot.getElementById('city-select').value;
-    try {
-      await this.queryServer('/game/play', {
-        move: {
-          type: 'move',
-          cityId,
-        },
-      });
-      this.actionError = null;
-    } catch (err) {
-      this.actionError = err.message;
-    }
+    this.sendAction({
+      type: 'pass',
+      cityId,
+    });
   }
 
-  async cleanWaste() {
+  cleanWaste() {
     const wasteType = this.shadowRoot.getElementById('waste-select').value;
-    try {
-      await this.queryServer('/game/play', {
-        move: {
-          type: 'clean',
-          wasteType,
-        },
-      });
-      this.actionError = null;
-    } catch (err) {
-      this.actionError = err.message;
-    }
+    this.sendAction({
+      type: 'pass',
+      wasteType,
+    });
   }
 
-  async implementSolution() {
+  implementSolution() {
     const cardIds = [];
     for (let i = 0; i < this.state.playerCards[this.playerIndex].length; ++i) {
       if (this.shadowRoot.getElementById(`card-${i}`).checked) {
@@ -414,19 +419,12 @@ class AppMain extends LitElement {
     }
     const wasteType = this.shadowRoot.getElementById('waste-select').value;
     const supportType = this.shadowRoot.getElementById('support-select').value;
-    try {
-      await this.queryServer('/game/play', {
-        move: {
-          type: 'solution',
-          cardIds,
-          wasteType,
-          supportType,
-        },
-      });
-      this.actionError = null;
-    } catch (err) {
-      this.actionError = err.message;
-    }
+    this.sendAction({
+      type: 'pass',
+      cardIds,
+      wasteType,
+      supportType,
+    });
   }
 
   async copyGameCode() {

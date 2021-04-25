@@ -75,7 +75,7 @@ app.post('/game/update', jsonParser, async (req, res) => {
 // Player move.
 app.post('/game/play', jsonParser, async (req, res) => {
   try {
-    await db.play(req.body.gameCode, req.body.playerId, req.body.move);
+    await db.play(req.body.gameCode, req.body.playerId, req.body.action);
     res.send({status: 'ok'});
   } catch (err) {
     res.status(403).end(err.message);

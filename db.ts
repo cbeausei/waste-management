@@ -213,7 +213,7 @@ export class Db {
     }
   }
 
-  async play(gameCode: string, playerId: number, move: any) {
+  async play(gameCode: string, playerId: number, action: any) {
     try {
       // Fetch the game, if it exists.
       const game = await this.collection.findOne({gameCode});
@@ -236,17 +236,19 @@ export class Db {
       }
 
       // Apply the move, if valid.
-      if (!move?.type) {
+      if (!action?.type) {
         throw new Error('The move must specify a type.');
       }
-      switch (move.type) {
+      switch (action.type) {
+        case 'pass':
+          break;
         case 'move':
-          const cityId = Number(move.cityId);
+          const cityId = Number(action.cityId);
           this.checkIntInRange('city ID', cityId, 0, gameData.cityCount);
           game.state.playerLocation[playerIndex] = cityId;
           break;
         case 'clean':
-          const wasteType = Number(move.wasteType);
+          const wasteType = Number(action.wasteType);
           this.checkIntInRange('waste type', wasteType, 0, gameData.wasteCount);
           game.state.cityStates[game.state.playerLocation[playerIndex]][wasteType] = 0;
           break;
@@ -254,7 +256,7 @@ export class Db {
           // Check card IDs.
           const cardIds: number[] = [];
           const cardSeen = new Set();
-          for (const cardId of move.cardIds) {
+          for (const cardId of action.cardIds) {
             const intCardId = Number(cardId);
             if (cardSeen.has(intCardId)) {
               throw new Error(`The card with ID ${intCardId} is selected multiple times.`);
@@ -264,10 +266,10 @@ export class Db {
             cardIds.push(intCardId);
           }
           // Check waste type.
-          const wasteType_ = Number(move.wasteType);
+          const wasteType_ = Number(action.wasteType);
           this.checkIntInRange('waste type', wasteType_, 0, gameData.wasteCount);
           // Check support type.
-          const supportType = Number(move.supportType);
+          const supportType = Number(action.supportType);
           this.checkIntInRange('support type', supportType, 0, gameData.supportCount);
           if (game.state.support[supportType] >= gameData.maxSupportLevel) {
             throw new Error(`The support type ${gameData.supportNames[supportType]} is already maxed out.`);
