@@ -278,6 +278,9 @@ export class Db {
             this.checkIntInRange('card ID', intCardId, 0, game.state.playerCards[playerIndex].length);
             cardIds.push(intCardId);
           }
+          if (cardIds.length <= 0) {
+            throw new Error('You must select at least one solution card.');
+          }
           // Check waste type.
           const wasteType_ = Number(action.wasteType);
           this.checkIntInRange('waste type', wasteType_, 0, gameData.wasteCount);

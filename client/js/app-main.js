@@ -196,6 +196,9 @@ class AppMain extends LitElement {
         li {
           margin-bottom: 4px;
         }
+        button[op] {
+          opacity: 0.4;
+        }
       </style>
 
       <div>
@@ -290,7 +293,8 @@ class AppMain extends LitElement {
               </li>
               ${this.state.playerCards[this.playerIndex].length > 0 ? html`
                 <li>
-                  <button @click="${this.implementSolution}">
+                  <button @click="${this.implementSolution}"
+                          ?op=${this.selectContent.cardIds.length <= 0}>
                     Combine <b>${this.selectContent.cardIds.length}</b> card${
                       this.selectContent.cardIds.length >= 2 ? html`s` : html``} to implement a solution in <b>${
                       this.gameData.cityNames[this.state.playerLocation[this.playerIndex]]}</b> for the <b>
