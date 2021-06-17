@@ -52,7 +52,32 @@ app.post('/game/join', jsonParser, async (req, res) => {
   }
 });
 
-// Player starts a game.
+// Player leaves a game.
+app.post('/game/leave', jsonParser, async (req, res) => {
+  const gameCode = req.body.gameCode;
+  const playerId = req.body.playerId;
+  try {
+    await db.leaveGame(gameCode, playerId);
+    res.send({status: 'Success'});
+  } catch (err) {
+    res.status(403).end(err.message);
+  }
+});
+
+// Player updates their nick.
+app.post('/game/nick', jsonParser, async (req, res) => {
+  const gameCode = req.body.gameCode;
+  const playerId = req.body.playerId;
+  const nick = req.body.nick;
+  try {
+    await db.updateNick(gameCode, playerId, nick);
+    res.send({status: 'Success'});
+  } catch (err) {
+    res.status(403).end(err.message);
+  }
+});
+
+// Player switches their readiness.
 app.post('/game/ready', jsonParser, async (req, res) => {
   try {
     await db.switchReadiness(req.body.gameCode, req.body.playerId);

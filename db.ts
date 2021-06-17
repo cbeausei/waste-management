@@ -61,6 +61,10 @@ export class Db {
     return new Error(`No game found with code ${gameCode}.`);
   }
 
+  gameAlreadyStarted() {
+    return new Error('This game has already started.');
+  }
+
   playerNotInGameError(gameCode: string) {
     return new Error(`This player can't access the game with code ${gameCode}.`);
   }
@@ -138,7 +142,7 @@ export class Db {
         throw this.gameNotFoundError(gameCode);
       }
       if (game.state.started) {
-        throw new Error('This game has already started.');
+        throw this.gameAlreadyStarted();
       }
       game.playerIds.push(playerId);
       game.state.ready.push(false);
@@ -152,6 +156,61 @@ export class Db {
       game.state.hasNewCard.push(false);
       await this.collection.updateOne({gameCode}, {$set: game});
       return game.playerIds.length - 1;
+    } catch (err) {
+      if (err.name === 'MongoError') {
+        console.error(err);
+        throw this.internalError();
+      } else {
+        throw err;
+      }
+    }
+  }
+
+  async leaveGame(gameCode: string, playerId: number) {
+    try {
+      const game = await this.collection.findOne({gameCode});
+      if (!game?.state) {
+        throw this.gameNotFoundError(gameCode);
+      }
+      if (game.state.started) {
+        throw this.gameAlreadyStarted();
+      }
+      const playerIndex = this.checkPlayerInGame(game, playerId);
+      if (playerIndex == null) {
+        throw this.playerNotInGameError(gameCode);
+      }
+      game.playerIds.splice(playerIndex, 1);
+      game.state.ready.splice(playerIndex, 1);
+      game.state.players.splice(playerIndex, 1);
+      game.state.playerLocation.splice(playerIndex, 1);
+      game.state.playerCards.splice(playerIndex, 1);
+      game.state.hasNewCard.splice(playerIndex, 1);
+      await this.collection.updateOne({gameCode}, {$set: game});
+    } catch (err) {
+      if (err.name === 'MongoError') {
+        console.error(err);
+        throw this.internalError();
+      } else {
+        throw err;
+      }
+    }
+  }
+
+  async updateNick(gameCode: string, playerId: number, nick: string) {
+    try {
+      const game = await this.collection.findOne({gameCode});
+      if (!game?.state) {
+        throw this.gameNotFoundError(gameCode);
+      }
+      if (game.state.started) {
+        throw this.gameAlreadyStarted();
+      }
+      const playerIndex = this.checkPlayerInGame(game, playerId);
+      if (playerIndex == null) {
+        throw this.playerNotInGameError(gameCode);
+      }
+      game.state.players[playerIndex] = nick;
+      await this.collection.updateOne({gameCode}, {$set: game});
     } catch (err) {
       if (err.name === 'MongoError') {
         console.error(err);
@@ -187,12 +246,7 @@ export class Db {
       if (!game?.state || !game?.playerIds) {
         throw this.gameNotFoundError(gameCode);
       }
-      let playerIndex = null;
-      for (let i = 0; i < game.playerIds.length; ++i) {
-        if (playerId === game.playerIds[i]) {
-          playerIndex = i;
-        }
-      }
+      const playerIndex = this.checkPlayerInGame(game, playerId);
       if (playerIndex == null) {
         throw this.playerNotInGameError(gameCode);
       }
@@ -222,12 +276,7 @@ export class Db {
       }
 
       // Check if this is the player's turn.
-      let playerIndex = null;
-      for (let i = 0; i < game.playerIds.length; ++i) {
-        if (playerId === game.playerIds[i]) {
-          playerIndex = i;
-        }
-      }
+      const playerIndex = this.checkPlayerInGame(game, playerId);
       if (playerIndex == null) {
         throw this.playerNotInGameError(gameCode);
       }
@@ -389,5 +438,15 @@ export class Db {
         throw err;
       }
     }
+  }
+
+  checkPlayerInGame(game: any, playerId: number) {
+    let playerIndex = null;
+    for (let index in game.playerIds) {
+      if (game.playerIds[index] === playerId) {
+        playerIndex = index;
+      }
+    }
+    return playerIndex;
   }
 }
