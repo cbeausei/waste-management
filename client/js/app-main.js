@@ -20,27 +20,7 @@ class AppMain extends LitElement {
 
   constructor() {
     super();
-
-    // Constants.
-    this.updateRateMs = 500;
-    
-    // State variables.
-    this.gameCode = null;
-    this.gameCodeError = null;
-    this.actionError = null;
-    this.playerId = null;
-    this.playerIndex = null;
-    this.nick = null;
-    this.state = null;
-    this.ready = false;
-    this.gameData = null;
-    this.showDetails = false;
-    this.selectContent = {
-      cityId: 0,
-      wasteType: 0,
-      supportType: 0,
-      cardIds: [],
-    };
+    this.reset(); 
     this.fetchGameData().then(gameData => {
       this.gameData = gameData;
     });
@@ -88,6 +68,28 @@ class AppMain extends LitElement {
       }
     </style>
     `;
+  }
+
+  reset() {
+    // Constants.
+    this.updateRateMs = 500;
+    
+    // State variables.
+    this.gameCode = null;
+    this.gameCodeError = null;
+    this.actionError = null;
+    this.playerId = null;
+    this.playerIndex = null;
+    this.nick = null;
+    this.state = null;
+    this.ready = false;
+    this.showDetails = false;
+    this.selectContent = {
+      cityId: 0,
+      wasteType: 0,
+      supportType: 0,
+      cardIds: [],
+    };
   }
 
   renderNickSelectionPage() {
@@ -143,6 +145,7 @@ class AppMain extends LitElement {
               <button @click="${this.switchReadiness}">
                 ${!this.ready ? html`I'm ready` : html`Wait`}
               </button>
+              <button @click="${this.leaveGame}">Leave</button>
             ` : html``}
           </li>
         `)}
@@ -523,6 +526,17 @@ class AppMain extends LitElement {
     this.gameCodeError = null;
     this.gameCode = this.shadowRoot.getElementById('game-code').value;
     await this.createPlayer();
+  }
+
+  async leaveGame() {
+    this.queryServer('/game/leave', {}).then(
+      success => {
+        this.reset();
+      },
+      err => {
+        this.gameCodeError = err.message;
+      }
+    );
   }
 
   async chooseNick(event) {

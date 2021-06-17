@@ -1,4 +1,4 @@
-# Waste management game server
+# Climates Waste Management Game
 
 ## Prototype
 

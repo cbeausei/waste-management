@@ -444,7 +444,7 @@ export class Db {
     let playerIndex = null;
     for (let index in game.playerIds) {
       if (game.playerIds[index] === playerId) {
-        playerIndex = index;
+        playerIndex = parseInt(index);
       }
     }
     return playerIndex;
