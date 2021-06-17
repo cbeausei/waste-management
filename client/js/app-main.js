@@ -1,4 +1,5 @@
 import {LitElement, html} from 'https://unpkg.com/lit-element/lit-element.js?module';
+import {generateNick} from './utils.js';
 import './support-display.js';
 import './waste-display.js';
 
@@ -80,7 +81,7 @@ class AppMain extends LitElement {
     this.actionError = null;
     this.playerId = null;
     this.playerIndex = null;
-    this.nick = null;
+    this.nick = generateNick();
     this.state = null;
     this.ready = false;
     this.showDetails = false;
@@ -90,17 +91,6 @@ class AppMain extends LitElement {
       supportType: 0,
       cardIds: [],
     };
-  }
-
-  renderNickSelectionPage() {
-    return html`
-      ${this.baseStyle}
-      <h3>Pick a nickname:</h3>
-      <div>
-        <input @keyup="${this.chooseNick}" id="player-nick" type="text">
-        <button @click="${this.chooseNick}">Confirm</button>
-      </div>
-    `;
   }
 
   renderGameSelectionPage() {
@@ -389,9 +379,6 @@ class AppMain extends LitElement {
   }
 
   render() {
-    if (this.nick == null) {
-      return this.renderNickSelectionPage();
-    }
     if (this.gameCode == null || this.gameCodeError != null) {
       return this.renderGameSelectionPage();
     }

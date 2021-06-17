@@ -1,4 +1,5 @@
 import {LitElement, html} from 'https://unpkg.com/lit-element/lit-element.js?module';
+import {generateNick} from './utils.js';
 import './server-status.js';
 import './app-main.js';
 
@@ -124,7 +125,7 @@ class DebugClient extends LitElement {
     const game = await response.json();
     const gameCode = game.gameCode;
     for (let i = 0; i < playerCount; ++i) {
-      const nick = `Client ${i + 1}`;
+      const nick = generateNick();
       const info = await this.queryServer('/game/join', {gameCode, nick});
       const playerId = info.playerId;
       this.clients.push({
