@@ -73,6 +73,7 @@ class AppMain extends LitElement {
     
     // State variables.
     this.gameCode = null;
+    this.enterGameCodeMode = false;
     this.gameCodeError = null;
     this.actionError = null;
     this.playerId = null;
@@ -165,6 +166,9 @@ class AppMain extends LitElement {
         }
         [box][blue]:hover {
           background-color: rgba(0, 0, 255, 0.3);
+        }
+        [back-button] {
+          margin: 24px;
         }
         [lobby-header] {
           align-items: baseline;
@@ -278,6 +282,11 @@ class AppMain extends LitElement {
               ${this.gameCodeError}
             </div>
           ` : html``}
+        </div>
+        <div back-button>
+          <button @click="${this.reset}">
+            Back
+          </button>
         </div>
       ` : html``}
 
