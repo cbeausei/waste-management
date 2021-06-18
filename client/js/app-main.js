@@ -126,7 +126,7 @@ class AppMain extends LitElement {
           margin: 24px;
         }
         [container] {
-          margin: 0 24px;
+          margin: 34px 24px 0 24px;
         }
         [boxes] {
           align-items: center;
@@ -250,15 +250,15 @@ class AppMain extends LitElement {
         <span title-icon class="material-icons">delete</span>
         <span>Waste Management Game</span>
       </div>
-      <div paragraph>
-        Understand, playing a fun game, trade-offs between
-        short-term waste management and implementation of
-        long-term solutions, making sure not to overload
-        our oceans with waste !
-      </div>
 
       <!-- Initial selection -->
       ${this.gameCode == null ? html`
+        <div paragraph>
+          Understand, playing a fun game, trade-offs between
+          short-term waste management and implementation of
+          long-term solutions, making sure not to overload
+          our oceans with waste !
+        </div>
         <div boxes>
           <div box red @click="${this.createGame}">
             <span>Start a new game and invite friends</span>
