@@ -112,11 +112,16 @@ class AppMain extends LitElement {
           width: 300px;
         }
         [title] {
+          align-items: center;
           display: flex;
-          font-size: 34px;
+          font-size: 30px;
           justify-content: center;
           text-align: center;
           margin-bottom: 16px;
+        }
+        [title-icon] {
+          font-size: 50px;
+          margin: 5px;
         }
         [paragraph] {
           margin: 24px;
@@ -161,7 +166,10 @@ class AppMain extends LitElement {
       <div logo-container>
         <img logo src="./assets/climates_logo.webp">
       </div>
-      <div title>Waste Management Game</div>
+      <div title>
+        <span title-icon class="material-icons">delete</span>
+        <span>Waste Management Game</span>
+      </div>
       <div paragraph>
         Understand, playing a fun game, trade-offs between
         short-term waste management and implementation of
