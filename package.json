@@ -7,7 +7,7 @@
     "start": "nodemon route.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "Clément Beauseigneur",
   "license": "ISC",
   "dependencies": {
     "express": "^4.17.1",
