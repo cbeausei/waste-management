@@ -7,6 +7,7 @@ class AppMain extends LitElement {
   static get properties() {
     return {
       joinCode: {type: String},
+      enterGameCodeMode: {type: Boolean},
       gameCode: {type: String},
       gameCodeError: {type: String},
       actionError: {type: String},
@@ -55,21 +56,12 @@ class AppMain extends LitElement {
       [error] {
         color: red;
       }
-      [bold] {0
+      [bold] {
         font-weight: 700;
       }
       [flex-line] {
         align-items: center;
         display: flex;
-      }
-      b[red] {
-        color: red;
-      }
-      span[red] {
-        color: red;
-      }
-      b[green] {
-        color: green;
       }
     </style>
     `;
@@ -253,7 +245,7 @@ class AppMain extends LitElement {
       </div>
 
       <!-- Initial selection -->
-      ${this.gameCode == null ? html`
+      ${this.gameCode == null && !this.enterGameCodeMode ? html`
         <div paragraph>
           Understand, playing a fun game, trade-offs between
           short-term waste management and implementation of
@@ -267,17 +259,29 @@ class AppMain extends LitElement {
             <span hover class="material-icons">delete_outline</span>
           </div>
           <div>or</div>
-          <div box blue @click="${this.joinGame}">
+          <div box blue @click="${this.enterGameCode}">
             <span>Join a game created by a friend</span>
             <span nothover class="material-icons">delete</span>
             <span hover class="material-icons">delete_outline</span>
           </div>
         </div>
-        ${this.gameCodeError != null ? html`<div error>${this.gameCodeError}</div>` : html``}
       ` : html ``}
 
+      <!-- Enter game code -->
+      ${this.enterGameCodeMode ? html`
+        <div>
+          <span>Enter a game code:</span>
+          <input @keyup="${this.joinGame}" id="game-code" type="text">
+          <button @click="${this.joinGame}">Join</button>
+        </div>
+        ${this.gameCodeError != null ? html`
+          <div error>${this.gameCodeError}</div>
+        ` : html``}
+      ` : html``}
+
       <!-- Loading -->
-      ${this.gameCode !== null && this.state == null ? html`
+      ${this.gameCode !== null && this.state == null
+        && !this.enterGameCodeMode ? html`
         <div container>
           Loading game...
         </div>
@@ -335,6 +339,15 @@ class AppMain extends LitElement {
     return html`
       ${this.baseStyle}
       <style>
+        b[red] {
+          color: red;
+        }
+        span[red] {
+          color: red;
+        }
+        b[green] {
+          color: green;
+        }
         [cities] {
           display: flex;
           flex-direction: column;
@@ -566,11 +579,11 @@ class AppMain extends LitElement {
     `
   }
 
-  async update(changedProperties) {
+  update(changedProperties) {
     super.update(changedProperties);
     if (changedProperties.has('joinCode')) {
       this.gameCode = this.joinCode;
-      await this.createPlayer();
+      this.createPlayer();
     }
   }
 
@@ -579,6 +592,10 @@ class AppMain extends LitElement {
       return this.renderWelcomePage();
     }
     return this.renderGamePage();
+  }
+
+  enterGameCode() {
+    this.enterGameCodeMode = true;
   }
 
   toggleDetails() {
@@ -727,14 +744,15 @@ class AppMain extends LitElement {
   }
 
   async createPlayer() {
+    this.enterGameCodeMode = false;
     this.queryServer('/game/join', {nick: this.nick}).then(info => {
       this.playerId = info.playerId;
       this.playerIndex = info.playerIndex;
       // TODO: update URL.
     }, err => {
-      console.log(err);
-      console.log(err.message);
+      this.gameCode = null;
       this.gameCodeError = err.message;
+      this.enterGameCodeMode = true;
       // TODO: clear URL.
     });
   }
