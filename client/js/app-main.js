@@ -31,7 +31,7 @@ class AppMain extends LitElement {
     this.baseStyle = html`
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons|Material+Icons+Outlined" rel="stylesheet">
     <style>
       *, *:before, *:after {
         box-sizing: inherit;
@@ -53,10 +53,6 @@ class AppMain extends LitElement {
       }
       [error] {
         color: red;
-      }
-      [nick] {
-        color: blue;
-        font-weight: 700;
       }
       [bold] {0
         font-weight: 700;
@@ -191,7 +187,57 @@ class AppMain extends LitElement {
           margin-right: 5px;
         }
         [players] {
-          margin-top: 24px;
+          margin: 24px 0;
+        }
+        [player-container] {
+          align-items: center;
+          display: flex;
+          margin: 5px 0;
+        }
+        [player] {
+          align-items: center;
+          background-color: lightgoldenrodyellow;
+          border: solid 1px black;
+          border-radius: 25px;
+          display: flex;
+          margin-right: 10px;
+          max-width: 300px;
+          padding: 15px 10px;
+          width: 100%;
+        }
+        [player][ready] {
+          background-color: darkseagreen;
+        }
+        [player] [nick] {
+          color: mediumblue;
+          font-weight: 700;
+        }
+        [player] > span {
+          margin-left: 10px;
+        }
+        [actions] {
+          align-items: center;
+          display: flex;
+        }
+        [action] {
+          border: solid 1px black;
+          border-radius: 10px;
+          margin-right: 10px;
+          padding: 10px 15px;
+          text-align: center;
+          width: 150px;
+        }
+        [action]:hover {
+          cursor: pointer;
+        }
+        [action][green]:hover {
+          background-color: darkseagreen;
+        }
+        [action][yellow]:hover {
+          background-color: lightgoldenrodyellow;
+        }
+        [action][red]:hover {
+          background-color: indianred;
         }
       </style>
 
@@ -240,7 +286,7 @@ class AppMain extends LitElement {
       ${this.state !== null ? html`
         <div container>
           <div lobby-header>
-            <span><b>Lobby</b></span>
+            <span><b>Game</b></span>
             <span gamecode>${this.gameCode}</span>
           </div>
           <div lobby>
@@ -250,26 +296,35 @@ class AppMain extends LitElement {
             </p>
             <p style="margin-top: 15px;">
               Invite your friends by sending them the game
-              code or the game URL !
+              code or URL !
             </p>
           </div>
           <div players>
-            <h3>Players</h3>
-            <ul>
-              ${this.state.players.map((nick, i) => html`
-                <li>
-                  ${i === this.playerIndex ? html`<span nick>${nick}</span>` : html`<span>${nick}</span>`}
-                  (${this.state.ready[i] ? html`<b>READY</b>` : html`not ready`})
-                  ${i === this.playerIndex ? html`
-                    <button @click="${this.switchReadiness}">
-                      ${!this.ready ? html`I'm ready` : html`Wait`}
-                    </button>
-                    <button @click="${this.leaveGame}">Leave</button>
-                  ` : html``}
-                </li>
-              `)}
-            </ul>
+            ${this.state.players.map((nick, i) => html`
+              <div player-container>
+                <div player ?ready=${this.state.ready[i]}>
+                  ${this.state.ready[i] ? html`
+                    <span class="material-icons-outlined">check_circle</span>
+                  ` : html`
+                    <span class="material-icons-outlined">hourglass_empty</span>
+                  `}
+                  <span ?nick=${i === this.playerIndex}>${nick}</span>
+                </div>
+                ${i === this.playerIndex ? html`
+                  <span class="material-icons-outlined">person</span>
+                ` : html``}
+              </player-container>
+            `)}
           </div>
+          <div actions>
+            <div action @click="${this.switchReadiness}"
+                 ?green=${!this.ready} ?yellow=${this.ready}>
+              ${!this.ready ? html`I'm ready` : html`Wait`}
+            </div>
+            <div action red @click="${this.leaveGame}">
+              Leave
+            </div>
+          </actions>
         </div>
       ` : html``}
     `;
