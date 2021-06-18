@@ -269,14 +269,16 @@ class AppMain extends LitElement {
 
       <!-- Enter game code -->
       ${this.enterGameCodeMode ? html`
-        <div>
+        <div container>
           <span>Enter a game code:</span>
           <input @keyup="${this.joinGame}" id="game-code" type="text">
           <button @click="${this.joinGame}">Join</button>
+            ${this.gameCodeError != null ? html`
+            <div error style="margin-top: 5px;">
+              ${this.gameCodeError}
+            </div>
+          ` : html``}
         </div>
-        ${this.gameCodeError != null ? html`
-          <div error>${this.gameCodeError}</div>
-        ` : html``}
       ` : html``}
 
       <!-- Loading -->
