@@ -108,6 +108,9 @@ class AppMain extends LitElement {
           display: flex;
           justify-content: center;
         }
+        [logo-container]:hover {
+          cursor: pointer;
+        }
         [logo] {
           width: 300px;
         }
@@ -147,8 +150,17 @@ class AppMain extends LitElement {
         [box] > * {
           margin: 4px 0;
         }
+        [box] [hover] {
+          display: none;
+        }
         [box]:hover {
           cursor: pointer;
+        }
+        [box]:hover [nothover] {
+          display: none;
+        }
+        [box]:hover [hover] {
+          display: inline-block;
         }
         [box][red] {
           border-color: red;
@@ -163,9 +175,10 @@ class AppMain extends LitElement {
           background-color: rgba(0, 0, 255, 0.3);
         }
       </style>
-      <div logo-container>
+      <a logo-container href="https://weareclimates.org"
+           target="_blank">
         <img logo src="./assets/climates_logo.webp">
-      </div>
+      </a>
       <div title>
         <span title-icon class="material-icons">delete</span>
         <span>Waste Management Game</span>
@@ -180,12 +193,14 @@ class AppMain extends LitElement {
         <div boxes>
           <div box red @click="${this.createGame}">
             <span>Start a new game and invite friends</span>
-            <span class="material-icons">delete</span>
+            <span nothover class="material-icons">delete</span>
+            <span hover class="material-icons">delete_outline</span>
           </div>
           <div>or</div>
           <div box blue @click="${this.joinGame}">
             <span>Join a game created by a friend</span>
-            <span class="material-icons">delete</span>
+            <span nothover class="material-icons">delete</span>
+            <span hover class="material-icons">delete_outline</span>
           </div>
         </div>
         ${this.gameCodeError != null ? html`<div error>${this.gameCodeError}</div>` : html``}
