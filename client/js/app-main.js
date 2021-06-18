@@ -129,6 +129,9 @@ class AppMain extends LitElement {
         [paragraph] {
           margin: 24px;
         }
+        [container] {
+          margin: 0 24px;
+        }
         [boxes] {
           align-items: center;
           display: flex;
@@ -174,7 +177,25 @@ class AppMain extends LitElement {
         [box][blue]:hover {
           background-color: rgba(0, 0, 255, 0.3);
         }
+        [lobby-header] {
+          align-items: baseline;
+          display: flex;
+          font-size: 24px;
+        }
+        [lobby-header] [gamecode] {
+          color: limegreen;
+          font-size: 30px;
+          margin-left: 10px;
+        }
+        [lobby] [button] {
+          margin-right: 5px;
+        }
+        [players] {
+          margin-top: 24px;
+        }
       </style>
+
+      <!-- Header -->
       <a logo-container href="https://weareclimates.org"
            target="_blank">
         <img logo src="./assets/climates_logo.webp">
@@ -189,6 +210,8 @@ class AppMain extends LitElement {
         long-term solutions, making sure not to overload
         our oceans with waste !
       </div>
+
+      <!-- Initial selection -->
       ${this.gameCode == null ? html`
         <div boxes>
           <div box red @click="${this.createGame}">
@@ -204,39 +227,51 @@ class AppMain extends LitElement {
           </div>
         </div>
         ${this.gameCodeError != null ? html`<div error>${this.gameCodeError}</div>` : html``}
-      ` : html `
-        <h3>
-          Joining game...
-        </h3>
-      `}
-      
-    `;
-  }
+      ` : html ``}
 
-  renderLobbyPage() {
-    return html`
-      ${this.baseStyle}
-      <h2>Waiting lobby</h2>
-      <p>
-        Game code: <span bold>${this.gameCode}</span>
-        <button style="margin-left: 5px;" @click="${this.copyGameCode}">Copy code</button>
-        <button style="margin-left: 5px;" @click="${this.copyGameUrl}">Copy game URL</button>
-      </p>
-      <h3>Players</h3>
-      <ul>
-        ${this.state.players.map((nick, i) => html`
-          <li>
-            ${i === this.playerIndex ? html`<span nick>${nick}</span>` : html`<span>${nick}</span>`}
-            (${this.state.ready[i] ? html`<b>READY</b>` : html`not ready`})
-            ${i === this.playerIndex ? html`
-              <button @click="${this.switchReadiness}">
-                ${!this.ready ? html`I'm ready` : html`Wait`}
-              </button>
-              <button @click="${this.leaveGame}">Leave</button>
-            ` : html``}
-          </li>
-        `)}
-      </ul>
+      <!-- Loading -->
+      ${this.gameCode !== null && this.state == null ? html`
+        <div container>
+          Loading game...
+        </div>
+      ` : html``}
+
+      <!-- Lobby -->
+      ${this.state !== null ? html`
+        <div container>
+          <div lobby-header>
+            <span><b>Lobby</b></span>
+            <span gamecode>${this.gameCode}</span>
+          </div>
+          <div lobby>
+            <p>
+              <button @click="${this.copyGameCode}">Copy code</button>
+              <button @click="${this.copyGameUrl}">Copy game URL</button>
+            </p>
+            <p style="margin-top: 15px;">
+              Invite your friends by sending them the game
+              code or the game URL !
+            </p>
+          </div>
+          <div players>
+            <h3>Players</h3>
+            <ul>
+              ${this.state.players.map((nick, i) => html`
+                <li>
+                  ${i === this.playerIndex ? html`<span nick>${nick}</span>` : html`<span>${nick}</span>`}
+                  (${this.state.ready[i] ? html`<b>READY</b>` : html`not ready`})
+                  ${i === this.playerIndex ? html`
+                    <button @click="${this.switchReadiness}">
+                      ${!this.ready ? html`I'm ready` : html`Wait`}
+                    </button>
+                    <button @click="${this.leaveGame}">Leave</button>
+                  ` : html``}
+                </li>
+              `)}
+            </ul>
+          </div>
+        </div>
+      ` : html``}
     `;
   }
 
@@ -476,11 +511,8 @@ class AppMain extends LitElement {
   }
 
   render() {
-    if (this.gameCode == null || this.state == null) {
+    if (this.gameCode == null || !this.state?.started) {
       return this.renderWelcomePage();
-    }
-    if (!this.state.started) {
-      return this.renderLobbyPage();
     }
     return this.renderGamePage();
   }
