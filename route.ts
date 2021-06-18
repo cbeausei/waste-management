@@ -17,6 +17,7 @@ const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
 // Serve the JS & debug clients.
 app.use('/js', express.static('client/js'));
+app.use('/assets', express.static('client/assets'));
 app.get('/', (req, res) => {
   res.sendFile(clientRoot + 'client.html');
 });

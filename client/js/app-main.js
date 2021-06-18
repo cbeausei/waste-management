@@ -29,6 +29,9 @@ class AppMain extends LitElement {
 
     // Shared templates.
     this.baseStyle = html`
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
       *, *:before, *:after {
         box-sizing: inherit;
@@ -37,6 +40,7 @@ class AppMain extends LitElement {
         box-sizing: border-box;
         display: flex;
         flex-direction: column;
+        font-family: 'Roboto', sans-serif;
         height: 100%;
         padding: 8px;
         width:100%;
@@ -61,10 +65,13 @@ class AppMain extends LitElement {
         align-items: center;
         display: flex;
       }
-      [red] {
+      b[red] {
         color: red;
       }
-      [green] {
+      span[red] {
+        color: red;
+      }
+      b[green] {
         color: green;
       }
     </style>
@@ -97,41 +104,80 @@ class AppMain extends LitElement {
     return html`
       ${this.baseStyle}
       <style>
+        [logo-container] {
+          display: flex;
+          justify-content: center;
+        }
+        [logo] {
+          width: 300px;
+        }
         [title] {
           display: flex;
           font-size: 34px;
           justify-content: center;
+          text-align: center;
+          margin-bottom: 16px;
+        }
+        [paragraph] {
+          margin: 24px;
         }
         [boxes] {
           align-items: center;
           display: flex;
-          flex: 1;
           justify-content: center;
         }
         [box] {
           align-items: center;
-          border: solid 3px gold;
+          border: solid 3px;
           border-radius: 20px;
           display: flex;
-          height: 150px;
+          flex-direction: column;
+          height: 200px;
+          justify-content: center;
           margin: 15px;
           padding: 15px;
           text-align: center;
-          width: 30%;
+          width: 38%;
+        }
+        [box] > * {
+          margin: 4px 0;
         }
         [box]:hover {
-          background-color: rgba(0, 0, 0, 0.3);
           cursor: pointer;
         }
+        [box][red] {
+          border-color: red;
+        }
+        [box][red]:hover {
+          background-color: rgba(255, 0, 0, 0.3);
+        }
+        [box][blue] {
+          border-color: blue;
+        }
+        [box][blue]:hover {
+          background-color: rgba(0, 0, 255, 0.3);
+        }
       </style>
+      <div logo-container>
+        <img logo src="./assets/climates_logo.webp">
+      </div>
       <div title>Waste Management Game</div>
+      <div paragraph>
+        Understand, playing a fun game, trade-offs between
+        short-term waste management and implementation of
+        long-term solutions, making sure not to overload
+        our oceans with waste !
+      </div>
       ${this.gameCode == null ? html`
         <div boxes>
-          <div box @click="${this.createGame}">
-            Start a new game and invite friends
+          <div box red @click="${this.createGame}">
+            <span>Start a new game and invite friends</span>
+            <span class="material-icons">delete</span>
           </div>
-          <div box @click="${this.joinGame}">
-            Join a game created by a friend
+          <div>or</div>
+          <div box blue @click="${this.joinGame}">
+            <span>Join a game created by a friend</span>
+            <span class="material-icons">delete</span>
           </div>
         </div>
         ${this.gameCodeError != null ? html`<div error>${this.gameCodeError}</div>` : html``}
