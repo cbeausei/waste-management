@@ -93,26 +93,54 @@ class AppMain extends LitElement {
     };
   }
 
-  renderGameSelectionPage() {
+  renderWelcomePage() {
     return html`
       ${this.baseStyle}
-      <h3>Player <span nick>${this.nick}</span></h3>
-      <div>
-        <button @click="${this.createGame}">Create a new game</button>
-      </div>
-      <p>Or enter a game code:</p>
-      <div>
-        <input @keyup="${this.joinGame}" id="game-code" type="text">
-        <button @click="${this.joinGame}">Join</button>
-      </div>
-      ${this.gameCodeError != null ? html`<div error>${this.gameCodeError}</div>` : html``}
-    `;
-  }
-  
-  renderWaitingGameCreationPage() {
-    return html`
-      ${this.baseStyle}
-      <p>Creating game, please wait a few seconds...</p>
+      <style>
+        [title] {
+          display: flex;
+          font-size: 34px;
+          justify-content: center;
+        }
+        [boxes] {
+          align-items: center;
+          display: flex;
+          flex: 1;
+          justify-content: center;
+        }
+        [box] {
+          align-items: center;
+          border: solid 3px gold;
+          border-radius: 20px;
+          display: flex;
+          height: 150px;
+          margin: 15px;
+          padding: 15px;
+          text-align: center;
+          width: 30%;
+        }
+        [box]:hover {
+          background-color: rgba(0, 0, 0, 0.3);
+          cursor: pointer;
+        }
+      </style>
+      <div title>Waste Management Game</div>
+      ${this.gameCode == null ? html`
+        <div boxes>
+          <div box @click="${this.createGame}">
+            Start a new game and invite friends
+          </div>
+          <div box @click="${this.joinGame}">
+            Join a game created by a friend
+          </div>
+        </div>
+        ${this.gameCodeError != null ? html`<div error>${this.gameCodeError}</div>` : html``}
+      ` : html `
+        <h3>
+          Joining game...
+        </h3>
+      `}
+      
     `;
   }
 
@@ -379,11 +407,8 @@ class AppMain extends LitElement {
   }
 
   render() {
-    if (this.gameCode == null || this.gameCodeError != null) {
-      return this.renderGameSelectionPage();
-    }
-    if (this.state == null) {
-      return this.renderWaitingGameCreationPage();
+    if (this.gameCode == null || this.state == null) {
+      return this.renderWelcomePage();
     }
     if (!this.state.started) {
       return this.renderLobbyPage();
