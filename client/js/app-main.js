@@ -6,6 +6,7 @@ import './waste-display.js';
 class AppMain extends LitElement {
   static get properties() {
     return {
+      joinCode: {type: String},
       gameCode: {type: String},
       gameCodeError: {type: String},
       actionError: {type: String},
@@ -563,6 +564,14 @@ class AppMain extends LitElement {
         ` : html``}
       </div>
     `
+  }
+
+  async update(changedProperties) {
+    super.update(changedProperties);
+    if (changedProperties.has('joinCode')) {
+      this.gameCode = this.joinCode;
+      await this.createPlayer();
+    }
   }
 
   render() {
